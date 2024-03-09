@@ -30,6 +30,58 @@ def unique_user_id_generator(instance):
 
 
 
+def unique_region_id_generator(instance):
+    """
+    This is for a region_id field
+    :param instance:
+    :return:
+    """
+    size = random.randint(5, 7)
+    region_id = "RG-" + random_string_generator(size=size, chars=string.ascii_uppercase + string.digits) + "-(R)"
+
+    Klass = instance.__class__
+    qs_exists = Klass.objects.filter(region_id=region_id).exists()
+    if qs_exists:
+        return None
+    return region_id
+
+
+
+def unique_constituency_id_generator(instance):
+    """
+    This is for a constituency_id field
+    :param instance:
+    :return:
+    """
+    size = random.randint(5, 7)
+    constituency_id = "CON-" + random_string_generator(size=size, chars=string.ascii_uppercase + string.digits) + "-(C)"
+
+    Klass = instance.__class__
+    qs_exists = Klass.objects.filter(constituency_id=constituency_id).exists()
+    if qs_exists:
+        return None
+    return constituency_id
+
+
+
+def unique_party_id_generator(instance):
+    """
+    This is for a party_id field
+    :param instance:
+    :return:
+    """
+    size = random.randint(5, 7)
+    party_id = "PTY-" + random_string_generator(size=size, chars=string.ascii_uppercase + string.digits) + "-(P)"
+
+    Klass = instance.__class__
+    qs_exists = Klass.objects.filter(party_id=party_id).exists()
+    if qs_exists:
+        return None
+    return party_id
+
+
+
+
 def generate_email_token():
     code = ''
     for i in range(4):

@@ -54,7 +54,12 @@ INSTALLED_APPS = [
 
     'accounts',
     'user_profile',
-    'activities'
+    'activities',
+    'regions',
+    'elections',
+    'history',
+    'candidates',
+    "parties"
 ]
 
 
