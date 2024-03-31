@@ -21,10 +21,14 @@ from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("chat/", include("chat.urls")),
 
     path('api/accounts/', include('accounts.api.urls', 'accounts_api')),
     path('api/regions/', include('regions.api.urls', 'regions_api')),
     path('api/parties/', include('parties.api.urls', 'parties_api')),
+    path('api/candidates/', include('candidates.api.urls', 'candidates_api')),
+    path('api/elections/', include('elections.api.urls', 'elections_api')),
+    path('api/search/', include('search.api.urls', 'search_api')),
 ]
 
 if settings.DEBUG:

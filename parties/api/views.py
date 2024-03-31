@@ -1,23 +1,26 @@
 
 from django.contrib.auth import get_user_model
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import authentication_classes, api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from activities.models import AllActivity
-from parties.api.serializers import AllPartiesSerializer, PartyDetailSerializer
-from parties.models import Party
-
+from candidates.api.serializers import PartyDetailSerializer, AllPartiesSerializer, AllPresidentialCandidateSerializer, \
+    AllParliamentaryCandidateSerializer
+from candidates.models import Party, PresidentialCandidate, ParliamentaryCandidate, PartyFlagBearer, \
+    PartyStandingCandidate
 
 User = get_user_model()
 
 
 @api_view(['POST', ])
-@permission_classes([])
-@authentication_classes([])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
 def add_party_view(request):
     payload = {}
     data = {}
@@ -68,7 +71,6 @@ def add_party_view(request):
     return Response(payload, status=status.HTTP_200_OK)
 
 
-
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])
@@ -77,22 +79,41 @@ def get_all_parties_view(request):
     data = {}
     errors = {}
 
-    if errors:
-        payload['message'] = "Errors"
-        payload['errors'] = errors
-        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+    parties = Party.objects.all()
 
-    all_parties = Party.objects.all()
+    # Search functionality
+    search_query = request.query_params.get('search')
+    if search_query:
+        parties = parties.filter(party_full_name__icontains=search_query)
 
-    all_party_serializer = AllPartiesSerializer(all_parties, many=True)
-    if all_party_serializer:
-        _all_parties = all_party_serializer.data
+    paginator = Paginator(parties, 10)  # 10 items per page
+    page = request.query_params.get('page')
+
+    try:
+        parties_page = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        parties_page = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        parties_page = paginator.page(paginator.num_pages)
+
+    party_serializer = AllPartiesSerializer(parties_page, many=True)
+    if party_serializer:
+        _all_parties = party_serializer.data
 
     payload['message'] = "Successful"
     payload['data'] = _all_parties
+    payload['pagination'] = {
+        'total_items': paginator.count,
+        'items_per_page': 10,
+        'total_pages': paginator.num_pages,
+        'current_page': parties_page.number,
+        'has_next': parties_page.has_next(),
+        'has_previous': parties_page.has_previous(),
+    }
 
     return Response(payload, status=status.HTTP_200_OK)
-
 
 
 @api_view(['GET', ])
@@ -124,5 +145,362 @@ def get_party_detail(request):
 
     payload['message'] = "Successful"
     payload['data'] = party
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def edit_party_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    party_id = request.data.get('party_id', '')
+    party_full_name = request.data.get('party_full_name', '')
+    party_initial = request.data.get('party_initial', '')
+    year_formed = request.data.get('year_formed', '')
+    party_logo = request.data.get('party_logo', '')
+
+    if not party_id:
+        errors['party_id'] = ['Party ID is required.']
+
+    if not party_full_name:
+        errors['party_full_name'] = ['Party full name is required.']
+
+    if not party_initial:
+        errors['party_initial'] = ['Party initial is required.']
+
+    if not year_formed:
+        errors['year_formed'] = ['Year formed is required.']
+
+    if not party_logo:
+        errors['party_logo'] = ['Party logo is required.']
+
+    try:
+        party = Party.objects.get(party_id=party_id)
+    except Party.DoesNotExist:
+        errors['party_id'] = ['Party does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    party.party_full_name = party_full_name
+    party.party_initial = party_initial
+    party.year_formed = year_formed
+    if party_logo:
+        party.party_logo = party_logo
+
+    party.save()
+
+    data['party_id'] = party.party_id
+
+    #
+    new_activity = AllActivity.objects.create(
+        user=request.user,
+        subject="Party Edited",
+        body="Party Edited"
+    )
+    new_activity.save()
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def delete_party_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    party_id = request.data.get('party_id', None)
+
+    if not party_id:
+        errors['party_id'] = ["Party id required"]
+
+    try:
+        party = Party.objects.get(party_id=party_id)
+    except Party.DoesNotExist:
+        errors['party_id'] = ['Party does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    party.delete()
+
+    payload['message'] = "Successfully"
+    payload['data'] = {}
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_all_party_candidates(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    party_id = request.query_params.get('party_id', '')
+
+    if not party_id:
+        errors['party_id'] = ['Party ID is required.']
+
+    try:
+        party = Party.objects.get(party_id=party_id)
+    except Party.DoesNotExist:
+        errors['party_id'] = ['Party does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    presidential_candidates = PresidentialCandidate.objects.filter(party=party)
+    parliamentary_candidates = ParliamentaryCandidate.objects.filter(party=party)
+
+    # Search functionality
+    search_query = request.query_params.get('search', '')
+    if search_query:
+        presidential_candidates = presidential_candidates.filter(name__icontains=search_query)
+        parliamentary_candidates = parliamentary_candidates.filter(name__icontains=search_query)
+
+    # Pagination
+    paginator = PageNumberPagination()
+    paginator.page_size = 10  # Set the number of items per page
+    presidential_candidates_page = paginator.paginate_queryset(presidential_candidates, request)
+    parliamentary_candidates_page = paginator.paginate_queryset(parliamentary_candidates, request)
+
+    presidential_serializer = AllPresidentialCandidateSerializer(presidential_candidates_page, many=True)
+    parliamentary_serializer = AllParliamentaryCandidateSerializer(parliamentary_candidates_page, many=True)
+
+    data['presidential_candidates'] = presidential_serializer.data
+    data['parliamentary_candidates'] = parliamentary_serializer.data
+
+    # Add pagination information to response
+    data['presidential_candidates_count'] = paginator.page.paginator.count
+    data['presidential_candidates_next'] = paginator.get_next_link()
+    data['presidential_candidates_previous'] = paginator.get_previous_link()
+    data['parliamentary_candidates_count'] = paginator.page.paginator.count
+    data['parliamentary_candidates_next'] = paginator.get_next_link()
+    data['parliamentary_candidates_previous'] = paginator.get_previous_link()
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_all_party_presidential_candidates(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    party_id = request.query_params.get('party_id', '')
+    search_query = request.query_params.get('search', '')  # Search query parameter
+
+    if not party_id:
+        errors['party_id'] = ['Party ID is required.']
+
+    try:
+        party = Party.objects.get(party_id=party_id)
+    except Party.DoesNotExist:
+        errors['party_id'] = ['Party does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    presidential_candidates = PresidentialCandidate.objects.filter(party=party)
+
+    # Apply search filter
+    if search_query:
+        presidential_candidates = presidential_candidates.filter(name__icontains=search_query)
+
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+
+    presidential_candidates_page = paginator.paginate_queryset(presidential_candidates, request)
+
+    presidential_serializer = AllPresidentialCandidateSerializer(presidential_candidates_page, many=True)
+
+    data['presidential_candidates'] = presidential_serializer.data
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+    payload['pagination'] = {
+        'total_items': paginator.page.paginator.count,
+        'items_per_page': paginator.page_size,
+        'total_pages': paginator.page.paginator.num_pages,
+        'current_page': paginator.page.number,
+        'has_next': paginator.page.has_next(),
+        'has_previous': paginator.page.has_previous(),
+    }
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_all_party_parliamentary_candidates(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    party_id = request.query_params.get('party_id', '')
+    search_query = request.query_params.get('search', '')  # Search query parameter
+    page_number = request.query_params.get('page', 1)  # Page number parameter
+    page_size = request.query_params.get('page_size', 10)  # Page size parameter
+
+    if not party_id:
+        errors['party_id'] = ['Party ID is required.']
+
+    try:
+        party = Party.objects.get(party_id=party_id)
+    except Party.DoesNotExist:
+        errors['party_id'] = ['Party does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    parliamentary_candidates = ParliamentaryCandidate.objects.filter(party=party)
+
+    # Apply search filter
+    if search_query:
+        parliamentary_candidates = parliamentary_candidates.filter(name__icontains=search_query)
+
+    paginator = PageNumberPagination()
+    paginator.page_size = page_size
+
+    parliamentary_candidates_page = paginator.paginate_queryset(parliamentary_candidates, request)
+
+    parliamentary_serializer = AllParliamentaryCandidateSerializer(parliamentary_candidates_page, many=True)
+
+    data['parliamentary_candidates'] = parliamentary_serializer.data
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+    payload['pagination'] = {
+        'total_items': paginator.page.paginator.count,
+        'items_per_page': paginator.page_size,
+        'total_pages': paginator.page.paginator.num_pages,
+        'current_page': paginator.page.number,
+        'has_next': paginator.page.has_next(),
+        'has_previous': paginator.page.has_previous(),
+    }
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+
+@api_view(['POST', ])
+@permission_classes([])
+@authentication_classes([])
+def add_flag_bearer(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    party_id = request.data.get('party_id', '')
+    prez_can_id = request.data.get('prez_can_id', '')
+    year = request.data.get('year', '')
+
+    if not party_id:
+        errors['party_id'] = ['Party ID is required.']
+
+    if not prez_can_id:
+        errors['prez_can_id'] = ['Presidential Candidate ID is required.']
+
+    try:
+        party = Party.objects.get(party_id=party_id)
+    except Party.DoesNotExist:
+        errors['party_id'] = ['Party does not exist.']
+
+    try:
+        presidential_candidate = PresidentialCandidate.objects.get(prez_can_id=prez_can_id)
+    except PresidentialCandidate.DoesNotExist:
+        errors['presidential_candidate_id'] = ['Presidential Candidate does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    new_flag_bearer = PartyFlagBearer.objects.create(
+        party=party,
+        flag_bearer=presidential_candidate,
+        year=year,
+    )
+
+    data['flag_bearer_id'] = new_flag_bearer.id
+
+    payload['message'] = "Flag bearer added successfully"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST', ])
+@permission_classes([])
+@authentication_classes([])
+def add_standing_candidate(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    party_id = request.data.get('party_id', '')
+    prez_can_id = request.data.get('prez_can_id', '')
+    year = request.data.get('year', '')
+    won = request.data.get('won', '')
+
+    if not party_id:
+        errors['party_id'] = ['Party ID is required.']
+
+    if not prez_can_id:
+        errors['prez_can_id'] = ['Presidential Candidate ID is required.']
+
+    try:
+        party = Party.objects.get(party_id=party_id)
+    except Party.DoesNotExist:
+        errors['party_id'] = ['Party does not exist.']
+
+    try:
+        presidential_candidate = PresidentialCandidate.objects.get(prez_can_id=prez_can_id)
+    except PresidentialCandidate.DoesNotExist:
+        errors['presidential_candidate_id'] = ['Presidential Candidate does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    new_standing_candidate = PartyStandingCandidate.objects.create(
+        party=party,
+        standing_candidate=presidential_candidate,
+        year=year,
+        won=won,
+    )
+
+    data['standing_candidate_id'] = new_standing_candidate.id
+
+    payload['message'] = "Successfully"
+    payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)

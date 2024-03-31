@@ -2,9 +2,10 @@ import os
 import random
 
 from django.db import models
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 
-from ghana_decides_proj.utils import unique_region_id_generator, unique_constituency_id_generator
+from ghana_decides_proj.utils import unique_region_id_generator, unique_constituency_id_generator, \
+    unique_zone_id_generator, unique_polling_station_id_generator
 
 
 def get_file_ext(filepath):
@@ -24,23 +25,22 @@ def upload_region_image_path(instance, filename):
 
 
 REGION_NAME_CHOICES = (
+    ('Ahafo', 'Ahafo'),
     ('Ashanti', 'Ashanti'),
+    ('Bono East', 'Bono East'),
     ('Brong Ahafo', 'Brong Ahafo'),
     ('Central', 'Central'),
     ('Eastern', 'Eastern'),
     ('Greater Accra', 'Greater Accra'),
     ('Northern', 'Northern'),
+    ('North East', 'North East'),
+    ('Oti', 'Oti'),
+    ('Savannah', 'Savannah'),
     ('Upper East', 'Upper East'),
     ('Upper West', 'Upper West'),
     ('Volta', 'Volta'),
     ('Western', 'Western'),
-    ('Savannah', 'Savannah'),
-    ('Bono East', 'Bono East'),
-    ('Oti', 'Oti'),
-    ('Ahafo', 'Ahafo'),
     ('Western North', 'Western North'),
-    ('North East', 'North East'),
-
 )
 class Region(models.Model):
     region_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
@@ -48,12 +48,26 @@ class Region(models.Model):
     initials = models.CharField(max_length=255,  blank=True, null=True)
     capital = models.CharField(max_length=255,  blank=True, null=True)
     map_image = models.ImageField(upload_to=upload_region_image_path, null=True, blank=True)
+    central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+    central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
 
 def pre_save_region_id_receiver(sender, instance, *args, **kwargs):
     if not instance.region_id:
         instance.region_id = unique_region_id_generator(instance)
 
 pre_save.connect(pre_save_region_id_receiver, sender=Region)
+
+
+class RegionalVotersParticipation(models.Model):
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='region_registered_voters')
+    year = models.CharField(max_length=255, blank=True, null=True)
+
+    registered_voters = models.IntegerField(default=0)
+    voters = models.IntegerField(default=0)
+    turn_out = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
+
 
 
 
@@ -72,6 +86,8 @@ class Constituency(models.Model):
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='region_constituencies')
     constituency_name = models.CharField(max_length=255, blank=True, null=True)
 
+    central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+    central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
 
 def pre_save_constituency_id_receiver(sender, instance, *args, **kwargs):
@@ -79,4 +95,73 @@ def pre_save_constituency_id_receiver(sender, instance, *args, **kwargs):
         instance.constituency_id = unique_constituency_id_generator(instance)
 
 pre_save.connect(pre_save_constituency_id_receiver, sender=Constituency)
+
+
+class ConstituencyVotersParticipation(models.Model):
+    constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name='constituency_registered_voters')
+    year = models.CharField(max_length=255, blank=True, null=True)
+
+    registered_voters = models.IntegerField(default=0)
+    voters = models.IntegerField(default=0)
+    turn_out = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
+
+
+
+class Zone(models.Model):
+    zone_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name='constituency_zones')
+    zone_name = models.CharField(max_length=255, blank=True, null=True)
+
+    central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+    central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
+class ZonalVotersParticipation(models.Model):
+    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name='zonal_registered_voters')
+    year = models.CharField(max_length=255, blank=True, null=True)
+
+    registered_voters = models.IntegerField(default=0)
+    voters = models.IntegerField(default=0)
+    turn_out = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
+
+
+
+
+def pre_save_zone_id_receiver(sender, instance, *args, **kwargs):
+    if not instance.zone_id:
+        instance.zone_id = unique_zone_id_generator(instance)
+
+pre_save.connect(pre_save_zone_id_receiver, sender=Zone)
+
+
+class PollingStation(models.Model):
+    polling_station_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name='zone_polling_stations')
+    polling_station_name = models.CharField(max_length=255, blank=True, null=True)
+
+    central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+    central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
+
+def pre_save_polling_station_id_receiver(sender, instance, *args, **kwargs):
+    if not instance.polling_station_id:
+        instance.polling_station_id = unique_polling_station_id_generator(instance)
+
+pre_save.connect(pre_save_polling_station_id_receiver, sender=PollingStation)
+
+
+
+class PollingStationVotersParticipation(models.Model):
+    polling_station = models.ForeignKey(PollingStation, on_delete=models.CASCADE, related_name='polling_station_registered_voters')
+    year = models.CharField(max_length=255, blank=True, null=True)
+
+    registered_voters = models.IntegerField(default=0)
+    voters = models.IntegerField(default=0)
+    non_voters = models.IntegerField(default=0)
+
+    turn_out_percent = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
+
+
 

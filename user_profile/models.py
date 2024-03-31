@@ -25,6 +25,16 @@ def upload_image_path(instance, filename):
     )
 
 
+def upload_id_card_path(instance, filename):
+    new_filename = random.randint(1, 3910209312)
+    name, ext = get_file_ext(filename)
+    final_filename = '{new_filename}{ext}'.format(new_filename=new_filename, ext=ext)
+    return "id_card/{new_filename}/{final_filename}".format(
+        new_filename=new_filename,
+        final_filename=final_filename
+    )
+
+
 
 def get_default_profile_image():
     return "defaults/default_profile_image.png"
@@ -41,6 +51,7 @@ class UserProfile(models.Model):
     #room = models.ForeignKey(PrivateChatRoom, on_delete=models.SET_NULL, null=True, blank=True, related_name="user_room")
     gender = models.CharField(max_length=100, choices=GENDER_CHOICES, blank=True, null=True)
     photo = models.ImageField(upload_to=upload_image_path, null=True, blank=True, default=get_default_profile_image)
+    id_card = models.ImageField(upload_to=upload_id_card_path, null=True, blank=True,)
     phone = models.CharField(max_length=255, null=True, blank=True)
     about_me = models.TextField(blank=True, null=True)
 

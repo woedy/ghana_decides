@@ -1,0 +1,70 @@
+version: "3.8"
+services:
+
+  # Redis
+  redis:
+    image: redis:alpine
+    container_name: ghana_decides_redis
+
+  # Database Postgres
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ghana_decides_postgres
+      - POSTGRES_USER=ghana_decides_postgres
+      - POSTGRES_PASSWORD=ghana_decides_postgres
+    container_name: ghana_decides_postgres_db
+
+  # Django Application
+  ghana_decides_app:
+    build:
+      context: .
+    volumes:
+      - .:/ghana_decides_django
+      - ./static_cdn:/var/lib/static_cdn
+    ports:
+      - 5050:5050
+    container_name: ghana_decides_app
+    command: python manage.py runserver 0.0.0.0:5050
+    depends_on:
+      - db
+
+  # Celery Worker
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A ghana_decides_proj worker -l DEBUG
+    volumes:
+      - .:/ghana_decides_django
+    container_name: ghana_decides_celery
+    depends_on:
+      - db
+      - redis
+      - ghana_decides_app
+
+  # Celery Beat
+  celery-beat:
+    restart: always
+    build:
+      context: .
+    command: celery -A ghana_decides_proj beat -l DEBUG
+    volumes:
+      - .:/ghana_decides_django
+    container_name: ghana_decides_celery_beat
+    depends_on:
+      - db
+      - redis
+      - ghana_decides_app
+
+volumes:
+  static_cdn:
+
+
+# networks:
+#   default:
+#     external: true
+#     name: docker-nginx-proxy-manager
+#

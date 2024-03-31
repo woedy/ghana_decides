@@ -1,6 +1,36 @@
 from rest_framework import serializers
 
-from regions.models import Region, Constituency
+from regions.models import Region, Constituency, Zone, PollingStation
+
+
+class PollingStationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PollingStation
+        fields = [
+            'polling_station_id',
+            'polling_station_name',
+        ]
+
+class ZoneSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Zone
+        fields = [
+            'zone_id',
+            'zone_name',
+        ]
+
+
+class ConstituencyZoneSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Zone
+        fields = [
+            'zone_id',
+            'zone_name',
+        ]
+
 
 class ConstituencyRegionSerializer(serializers.ModelSerializer):
 

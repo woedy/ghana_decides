@@ -57,9 +57,12 @@ INSTALLED_APPS = [
     'activities',
     'regions',
     'elections',
-    'history',
     'candidates',
-    "parties"
+    "parties",
+    "video_call",
+    "search",
+    "chat",
+    "homepage"
 ]
 
 
@@ -105,24 +108,24 @@ ASGI_APPLICATION = "ghana_decides_proj.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'bookelu_postgres',
-#         'USER': 'bookelu_postgres',
-#         'PASSWORD': 'bookelu_postgres',
-#         'HOST': 'db',
-#         'PORT': 5432,
-#      }
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
 # }
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ghana_decides_postgres',
+        'USER': 'ghana_decides_postgres',
+        'PASSWORD': 'ghana_decides_postgres',
+        'HOST': 'db',
+        'PORT': 5432,
+     }
+}
 
 
 CELERY_BROKER_URL = "redis://redis:6379"
@@ -192,14 +195,25 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
 
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     },
+# }
+
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("redis", 6379)],
         },
     },
 }
+
 
 
 CORS_ALLOW_ALL_ORIGINS = True

@@ -64,9 +64,12 @@ class UserManager(BaseUserManager):
 
 USER_TYPE = (
     ('Presenter', 'Presenter'),
+    ('Correspondent', 'Correspondent'),
+    ('Polling Agent', 'Polling Agent'),
+    
     ('Data Admin', 'Data Admin'),
     ('Super Admin', 'Super Admin'),
-    ('Field Agent', 'Field Agent'),
+
 
 )
 
@@ -76,10 +79,7 @@ class User(AbstractBaseUser):
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
 
-
     user_type = models.CharField(max_length=100, choices=USER_TYPE, blank=True, null=True)
-
-
     fcm_token = models.TextField(blank=True, null=True)
 
     otp_code = models.CharField(max_length=10, blank=True, null=True)

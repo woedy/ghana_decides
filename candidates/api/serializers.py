@@ -1,63 +1,109 @@
 from rest_framework import serializers
 
-from regions.models import Region, Constituency
+from candidates.models import ParliamentaryCandidate, PresidentialCandidate
+from candidates.models import Party
+from regions.api.serializers import AllConstituenciesSerializer
 
-class ConstituencyRegionSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Region
-        fields = [
-            'region_id',
-            'region_name',
-        ]
-class ConstituencyDetailSerializer(serializers.ModelSerializer):
-    region = ConstituencyRegionSerializer(many=False)
-    class Meta:
-        model = Constituency
-        fields = [
-            'constituency_id',
-            'constituency_name',
-            'region'
-        ]
-
-class AllConstituenciesSerializer(serializers.ModelSerializer):
+class CandidatePartySerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Constituency
+        model = Party
         fields = [
-            'constituency_id',
-            'constituency_name'
+            'party_id',
+            'party_full_name',
+            'party_initial',
+            'party_logo',
         ]
 
 
-class RegionalConstituenciesSerializer(serializers.ModelSerializer):
+class ParliamentaryCandidateDetailSerializer(serializers.ModelSerializer):
+    party = CandidatePartySerializer(many=False)
+    constituency = AllConstituenciesSerializer(many=False)
 
     class Meta:
-        model = Constituency
+        model = ParliamentaryCandidate
         fields = [
-            'constituency_id',
-            'constituency_name'
+            'parl_can_id',
+            'constituency',
+            'party',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'photo',
+            'gender',
+            'candidate_type',
         ]
 
-class RegionDetailSerializer(serializers.ModelSerializer):
-    region_constituencies = RegionalConstituenciesSerializer(many=True)
+class AllParliamentaryCandidateSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Region
+        model = ParliamentaryCandidate
         fields = [
-            'region_id',
-            'region_name',
-            'map_image',
-            'initials',
-            'region_constituencies'
+            'parl_can_id',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'photo',
 
         ]
 
-class AllRegionsSerializer(serializers.ModelSerializer):
+
+
+class PresidentialCandidateDetailSerializer(serializers.ModelSerializer):
+    party = CandidatePartySerializer(many=False)
 
     class Meta:
-        model = Region
+        model = PresidentialCandidate
         fields = [
-            'region_id',
-            'region_name',
+            'prez_can_id',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'photo',
+            'gender',
+            'candidate_type',
+            'party',
+        ]
+
+
+class AllPresidentialCandidateSerializer(serializers.ModelSerializer):
+    party = CandidatePartySerializer(many=False)
+
+    class Meta:
+        model = PresidentialCandidate
+        fields = [
+            'prez_can_id',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'photo',
+            'party'
+
+        ]
+
+
+
+
+class PartyDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Party
+        fields = [
+            'party_id',
+            'party_full_name',
+            'party_initial',
+            'year_formed',
+            'party_logo',
+        ]
+
+class AllPartiesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Party
+        fields = [
+            'party_id',
+            'party_full_name',
+            'party_initial',
+            'party_logo',
         ]

@@ -4,15 +4,21 @@ from celery import chain
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMessage
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.dateparse import parse_time
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import authentication_classes, api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from activities.models import AllActivity
+from candidates.api.serializers import AllParliamentaryCandidateSerializer, ParliamentaryCandidateDetailSerializer, \
+    AllPresidentialCandidateSerializer, PresidentialCandidateDetailSerializer
+from candidates.models import ParliamentaryCandidate, PresidentialCandidate
+from candidates.models import Party
 from regions.api.serializers import AllRegionsSerializer, RegionDetailSerializer, RegionalConstituenciesSerializer, \
     AllConstituenciesSerializer, ConstituencyDetailSerializer
 from regions.models import Region, Constituency
@@ -28,38 +34,509 @@ def add_parliamentary_candidate(request):
     data = {}
     errors = {}
 
-    region_name = request.data.get('region_name', '')
-    map_image = request.data.get('map_image', '')
-    initials = request.data.get('initials', '')
-    capital = request.data.get('capital', '')
+    constituency_id = request.data.get('constituency_id', '')
+    party_id = request.data.get('party_id', '')
+    first_name = request.data.get('first_name', '')
+    last_name = request.data.get('last_name', '')
+    middle_name = request.data.get('middle_name', '')
+    photo = request.data.get('photo', '')
+    gender = request.data.get('gender', '')
+    candidate_type = request.data.get('candidate_type', '')
 
-    if not region_name:
-        errors['region_name'] = ['Region name is required.']
+    if not constituency_id:
+        errors['constituency_id'] = ['Constituency id is required.']
+
+    if not party_id:
+        errors['party_id'] = ['Party id is required.']
+
+    if not first_name:
+        errors['first_name'] = ['First name id is required.']
+
+    if not last_name:
+        errors['last_name'] = ['Last Name is required.']
+
+    if not photo:
+        errors['photo'] = ['Photo is required.']
+
+    if not gender:
+        errors['gender'] = ['Gender is required.']
+
+    if not candidate_type:
+        errors['candidate_type'] = ['Candidate type is required.']
+
+
+    try:
+        party = Party.objects.get(party_id=party_id)
+    except Party.DoesNotExist:
+        errors['party_id'] = ['Party does not exist.']
+
+    try:
+        constituency = Constituency.objects.get(constituency_id=constituency_id)
+    except Constituency.DoesNotExist:
+        errors['constituency_id'] = ['Constituency does not exist.']
 
     if errors:
         payload['message'] = "Errors"
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-    new_region = Region.objects.create(
-        region_name=region_name,
-        map_image=map_image,
-        initials=initials,
-        capital=capital
+    new_parl_can = ParliamentaryCandidate.objects.create(
+        constituency=constituency,
+        party=party,
+        first_name=first_name,
+        last_name=last_name,
+        middle_name=middle_name,
+        photo=photo,
+        gender=gender,
+        candidate_type=candidate_type,
     )
 
-    data['region_id'] = new_region.region_id
+    data['parl_can_id'] = new_parl_can.parl_can_id
 
     #
     new_activity = AllActivity.objects.create(
         user=User.objects.get(id=1),
-        subject="Region Registration",
-        body="New Region added"
+        subject="Parliamentary Candidate Registration",
+        body="New Parliamentary Candidate added"
     )
     new_activity.save()
 
     payload['message'] = "Successful"
     payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def edit_parliamentary_candidate_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    parl_can_id = request.data.get('parl_can_id', '')
+    first_name = request.data.get('first_name', '')
+    last_name = request.data.get('last_name', '')
+    middle_name = request.data.get('middle_name', '')
+    photo = request.data.get('photo', '')
+    gender = request.data.get('gender', '')
+    candidate_type = request.data.get('candidate_type', '')
+    party_id = request.data.get('party_id', '')
+    constituency_id = request.data.get('constituency_id', '')
+
+    if not parl_can_id:
+        errors['parl_can_id'] = ['Candidate ID is required.']
+
+    try:
+        candidate = ParliamentaryCandidate.objects.get(parl_can_id=parl_can_id)
+    except ParliamentaryCandidate.DoesNotExist:
+        errors['candidate_id'] = ['Parliamentary candidate does not exist.']
+
+    if not errors:
+        # Update candidate fields if the corresponding data is provided
+        if first_name:
+            candidate.first_name = first_name
+        if last_name:
+            candidate.last_name = last_name
+        if middle_name:
+            candidate.middle_name = middle_name
+        if photo:
+            candidate.photo = photo
+        if gender:
+            candidate.gender = gender
+        if candidate_type:
+            candidate.candidate_type = candidate_type
+
+        # Update party and constituency if IDs are provided
+        if party_id:
+            try:
+                party = Party.objects.get(party_id=party_id)
+                candidate.party = party
+            except Party.DoesNotExist:
+                errors['party_id'] = ['Party does not exist.']
+        if constituency_id:
+            try:
+                constituency = Constituency.objects.get(constituency_id=constituency_id)
+                candidate.constituency = constituency
+            except Constituency.DoesNotExist:
+                errors['constituency_id'] = ['Constituency does not exist.']
+
+        if not errors:
+            candidate.save()
+            data['parl_can_id'] = candidate.parl_can_id
+            payload['message'] = "Successfully"
+            payload['data'] = data
+        else:
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_all_parliamentary_candidate(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    search_query = request.GET.get('search', None)
+    page_number = request.GET.get('page', 1)
+    page_size = request.GET.get('page_size', 10)
+
+    all_parl_can = ParliamentaryCandidate.objects.all()
+
+    # Apply search filter if search query is provided
+    if search_query:
+        all_parl_can = all_parl_can.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(middle_name__icontains=search_query)
+        )
+
+    paginator = PageNumberPagination()
+    paginator.page_size = page_size
+
+    result_page = paginator.paginate_queryset(all_parl_can, request)
+
+    all_parl_can_serializer = AllParliamentaryCandidateSerializer(result_page, many=True)
+    _all_parl_can = all_parl_can_serializer.data
+
+    payload['message'] = "Successful"
+    payload['data'] = _all_parl_can
+    payload['pagination'] = {
+        'total_items': paginator.page.paginator.count,
+        'items_per_page': paginator.page_size,
+        'total_pages': paginator.page.paginator.num_pages,
+        'current_page': paginator.page.number,
+        'has_next': paginator.page.has_next(),
+        'has_previous': paginator.page.has_previous(),
+    }
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_parliamentary_candidate_details(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    parl_can_id = request.query_params.get('parl_can_id', None)
+
+    if not parl_can_id:
+        errors['parl_can_id'] = ["Parliamentary Candidate id required"]
+
+    try:
+        parl_can = ParliamentaryCandidate.objects.get(parl_can_id=parl_can_id)
+    except ParliamentaryCandidate.DoesNotExist:
+        errors['parl_can_id'] = ['Parliamentary Candidate does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    parl_can_serializer = ParliamentaryCandidateDetailSerializer(parl_can, many=False)
+    if parl_can_serializer:
+        parl_can = parl_can_serializer.data
+
+    payload['message'] = "Successful"
+    payload['data'] = parl_can
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def delete_parliamentary_candidate_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    parl_can_id = request.data.get('parl_can_id', '')
+
+    if not parl_can_id:
+        errors['parl_can_id'] = ['Parliamentary Candidate ID is required.']
+
+    try:
+        candidate = ParliamentaryCandidate.objects.get(parl_can_id=parl_can_id)
+    except ParliamentaryCandidate.DoesNotExist:
+        errors['parl_can_id'] = ['Parliamentary candidate does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    candidate.delete()
+
+    #
+    new_activity = AllActivity.objects.create(
+        user=User.objects.get(id=1),
+        subject="Parliamentary Candidate Deleted",
+        body="Parliamentary Candidate Deleted"
+    )
+    new_activity.save()
+
+    payload['message'] = "Successful"
+    payload['data'] = {}
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+#######################
+##### PRESIDENTIAL
+###################
+
+
+@api_view(['POST', ])
+@permission_classes([])
+@authentication_classes([])
+def add_presidential_candidate(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    party_id = request.data.get('party_id', '')
+    first_name = request.data.get('first_name', '')
+    last_name = request.data.get('last_name', '')
+    middle_name = request.data.get('middle_name', '')
+    photo = request.data.get('photo', '')
+    gender = request.data.get('gender', '')
+    candidate_type = request.data.get('candidate_type', '')
+
+
+    if not party_id:
+        errors['party_id'] = ['Party id is required.']
+
+    if not first_name:
+        errors['first_name'] = ['First name id is required.']
+
+    if not last_name:
+        errors['last_name'] = ['Last Name is required.']
+
+    if not photo:
+        errors['photo'] = ['Photo is required.']
+
+    if not gender:
+        errors['gender'] = ['Gender is required.']
+
+    if not candidate_type:
+        errors['candidate_type'] = ['Candidate type is required.']
+
+
+    try:
+        party = Party.objects.get(party_id=party_id)
+    except Party.DoesNotExist:
+        errors['party_id'] = ['Party does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    new_prez_can = PresidentialCandidate.objects.create(
+        party=party,
+        first_name=first_name,
+        last_name=last_name,
+        middle_name=middle_name,
+        photo=photo,
+        gender=gender,
+        candidate_type=candidate_type,
+    )
+
+    data['prez_can_id'] = new_prez_can.prez_can_id
+
+    #
+    new_activity = AllActivity.objects.create(
+        user=User.objects.get(id=1),
+        subject="Presidential Candidate Registration",
+        body="New Presidential Candidate added"
+    )
+    new_activity.save()
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def edit_presidential_candidate_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    prez_can_id = request.data.get('prez_can_id', '')
+    first_name = request.data.get('first_name', '')
+    last_name = request.data.get('last_name', '')
+    middle_name = request.data.get('middle_name', '')
+    photo = request.data.get('photo', '')
+    gender = request.data.get('gender', '')
+    candidate_type = request.data.get('candidate_type', '')
+
+    if not prez_can_id:
+        errors['prez_can_id'] = ['Candidate ID is required.']
+
+    try:
+        candidate = PresidentialCandidate.objects.get(prez_can_id=prez_can_id)
+    except PresidentialCandidate.DoesNotExist:
+        errors['candidate_id'] = ['Presidential candidate does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    # Update candidate fields if the corresponding data is provided
+    if first_name:
+        candidate.first_name = first_name
+    if last_name:
+        candidate.last_name = last_name
+    if middle_name:
+        candidate.middle_name = middle_name
+    if photo:
+        candidate.photo = photo
+    if gender:
+        candidate.gender = gender
+    if candidate_type:
+        candidate.candidate_type = candidate_type
+
+    candidate.save()
+
+    data['prez_can_id'] = candidate.prez_can_id
+
+    payload['message'] = "Successfully"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_all_presidential_candidate(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    search_query = request.GET.get('search', None)
+    page_number = request.GET.get('page', 1)
+    page_size = request.GET.get('page_size', 10)
+
+    all_prez_can = PresidentialCandidate.objects.all()
+
+    # Apply search filter if search query is provided
+    if search_query:
+        all_prez_can = all_prez_can.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(middle_name__icontains=search_query)
+        )
+
+    paginator = PageNumberPagination()
+    paginator.page_size = page_size
+
+    result_page = paginator.paginate_queryset(all_prez_can, request)
+
+    all_prez_can_serializer = AllPresidentialCandidateSerializer(result_page, many=True)
+    _all_prez_can = all_prez_can_serializer.data
+
+    payload['message'] = "Successful"
+    payload['data'] = _all_prez_can
+    payload['pagination'] = {
+        'total_items': paginator.page.paginator.count,
+        'items_per_page': paginator.page_size,
+        'total_pages': paginator.page.paginator.num_pages,
+        'current_page': paginator.page.number,
+        'has_next': paginator.page.has_next(),
+        'has_previous': paginator.page.has_previous(),
+    }
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_presidential_candidate_details(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    prez_can_id = request.query_params.get('prez_can_id', None)
+
+    if not prez_can_id:
+        errors['prez_can_id'] = ["Presidential Candidate id required"]
+
+    try:
+        prez_can = PresidentialCandidate.objects.get(prez_can_id=prez_can_id)
+    except PresidentialCandidate.DoesNotExist:
+        errors['prez_can_id'] = ['Presidential Candidate does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    prez_can_serializer = PresidentialCandidateDetailSerializer(prez_can, many=False)
+    if prez_can_serializer:
+        prez_can = prez_can_serializer.data
+
+    payload['message'] = "Successful"
+    payload['data'] = prez_can
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def delete_presidential_candidate_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    prez_can_id = request.data.get('prez_can_id', '')
+
+
+    print(prez_can_id)
+
+    if not prez_can_id:
+        errors['prez_can_id'] = ['Presidential Candidate ID is required.']
+
+    try:
+        candidate = PresidentialCandidate.objects.get(prez_can_id=prez_can_id)
+    except PresidentialCandidate.DoesNotExist:
+        errors['prez_can_id'] = ['Presidential candidate does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    candidate.delete()
+
+    #
+    new_activity = AllActivity.objects.create(
+        user=User.objects.get(id=1),
+        subject="Presidential Candidate Deleted",
+        body="Presidential Candidate Deleted"
+    )
+    new_activity.save()
+
+    payload['message'] = "Successful"
+    payload['data'] = {}
 
     return Response(payload, status=status.HTTP_200_OK)
 
