@@ -4,138 +4,42 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5c1ec882-703d-4d4b-9918-2c7a8a3a99a2" name="Changes" comment="Building All models">
-      <change afterPath="$PROJECT_DIR$/.idea/ghana_desides_server.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/activities/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/candidates/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat/consumers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat/templates/chat/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat/templates/chat/room.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/command.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose22.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/elections/api/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/elections/api/serializers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/elections/api/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/elections/api/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/elections/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ghana_decides_proj/exceptions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/homepage/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/homepage/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/homepage/api/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/homepage/api/data_admin_dashboard_consumers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/homepage/api/serializers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/homepage/api/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/homepage/api/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/homepage/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/homepage/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/homepage/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/homepage/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/machine_learning/.ipynb_checkpoints/first_test-checkpoint.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/machine_learning/first_test.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/machine_learning/music-recommender.dot" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/machine_learning/music2.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/machine_learning/vgsales.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/regions/api/regions_consumers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/regions/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/regions/migrations/0002_pollingstationvotersparticipation_turn_out_percent_and_more.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/regions/migrations/0003_rename_turn_out_pollingstationvotersparticipation_non_voters.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/api/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/api/consumers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/api/serializers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/api/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/api/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/1039811757/1039811757.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/105650412/105650412.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/1362400500/1362400500.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/2200013637/2200013637.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/2411319735/2411319735.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/253683430/253683430.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/2760133277/2760133277.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/28158002/28158002.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/2869079680/2869079680.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/2879920339/2879920339.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/2929791312/2929791312.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/2943696584/2943696584.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/3219101504/3219101504.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/3343290021/3343290021.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/3756732500/3756732500.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/3870753403/3870753403.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/3897037805/3897037805.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/39523149/39523149.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/519790873/519790873.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/521709991/521709991.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/524495331/524495331.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/585128065/585128065.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/730653359/730653359.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/user_profile/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/user_profile/migrations/0002_userprofile_id_card.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/api/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/api/consumers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/api/serializers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/api/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/api/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/video_call/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/api/serializers.py" afterDir="false" />
+    <list default="true" id="5c1ec882-703d-4d4b-9918-2c7a8a3a99a2" name="Changes" comment="Connecting Endpoints v1">
+      <change afterPath="$PROJECT_DIR$/candidates/api/parl_candidate_consumers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/candidates/api/prez_candidate_consumers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/elections/api/consumers/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/elections/api/consumers/election_dashboard_consumers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/elections/api/consumers/elections_consumers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/elections/api/consumers/votes_consumers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/elections/api/election_view.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parties/api/parties_consumers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/regions/api/constituencies_consumers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/regions/api/electoral_area_consumers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/regions/api/polling_station_consumers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/accounts/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/api/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/accounts/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/candidates/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/candidates/api/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/candidates/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/candidates/api/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/candidates/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/candidates/api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/candidates/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/candidates/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/elections/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/elections/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/elections/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/elections/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/elections/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ghana_decides_proj/routing.py" beforeDir="false" afterPath="$PROJECT_DIR$/ghana_decides_proj/routing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ghana_decides_proj/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ghana_decides_proj/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ghana_decides_proj/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/ghana_decides_proj/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ghana_decides_proj/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/ghana_decides_proj/tasks.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ghana_decides_proj/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ghana_decides_proj/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/history/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/history/admin.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/history/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat/apps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/history/migrations/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat/migrations/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/history/models.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/history/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/history/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/homepage/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parties/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/parties/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/homepage/api/data_admin_dashboard_consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/homepage/api/data_admin_dashboard_consumers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_selenium_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_selenium_script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/parties/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/parties/api/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parties/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/parties/api/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parties/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/parties/api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parties/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/parties/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/regions/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/regions/api/regions_consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/api/regions_consumers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/regions/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/api/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/regions/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/api/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/regions/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/api/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/regions/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user_profile/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/user_profile/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -146,6 +50,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -174,16 +79,19 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;building-models-1&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/LENOVO/Documents/SamaPro/Backend/GhanaDecides/ghana_desides_server/ghana_desides_server/regions/api&quot;
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/LENOVO/Documents/SamaPro/Backend/GhanaDecides/ghana_desides_server/ghana_desides_server/elections/api/consumers&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\LENOVO\Documents\SamaPro\Backend\GhanaDecides\ghana_desides_server\ghana_desides_server\elections\api\consumers" />
+      <recent name="C:\Users\LENOVO\Documents\SamaPro\Backend\GhanaDecides\ghana_desides_server\ghana_desides_server\elections\api" />
+      <recent name="C:\Users\LENOVO\Documents\SamaPro\Backend\GhanaDecides\ghana_desides_server\ghana_desides_server\candidates\api" />
+      <recent name="C:\Users\LENOVO\Documents\SamaPro\Backend\GhanaDecides\ghana_desides_server\ghana_desides_server\parties\api" />
       <recent name="C:\Users\LENOVO\Documents\SamaPro\Backend\GhanaDecides\ghana_desides_server\ghana_desides_server\regions\api" />
-      <recent name="C:\Users\LENOVO\Documents\SamaPro\Backend\GhanaDecides\ghana_desides_server\ghana_desides_server\homepage" />
-      <recent name="C:\Users\LENOVO\Documents\SamaPro\Backend\GhanaDecides\ghana_desides_server\ghana_desides_server" />
-      <recent name="C:\Users\LENOVO\Documents\SamaPro\Backend\GhanaDecides\ghana_desides_server\ghana_desides_server\ghana_decides_proj" />
-      <recent name="C:\Users\LENOVO\Documents\SamaPro\Backend\GhanaDecides\ghana_desides_server\ghana_desides_server\search\api" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\LENOVO\Documents\SamaPro\Backend\GhanaDecides\ghana_desides_server\ghana_desides_server\elections\api\consumers" />
     </key>
   </component>
   <component name="RunManager" selected="Python.my_selenium_script">
@@ -277,14 +185,23 @@
       <option name="project" value="LOCAL" />
       <updated>1709991579098</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Connecting Endpoints v1">
+      <option name="closed" value="true" />
+      <created>1711908247106</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1711908247106</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="inittttt" />
     <MESSAGE value="Authentication Done" />
     <MESSAGE value="Building All models" />
-    <option name="LAST_COMMIT_MESSAGE" value="Building All models" />
+    <MESSAGE value="Connecting Endpoints v1" />
+    <option name="LAST_COMMIT_MESSAGE" value="Connecting Endpoints v1" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -293,11 +210,6 @@
           <url>file://$PROJECT_DIR$/main.py</url>
           <line>8</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/regions/api/views.py</url>
-          <line>128</line>
-          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -1,28 +1,48 @@
 from rest_framework import serializers
 
-from candidates.api.serializers import AllPresidentialCandidateSerializer
+from candidates.api.serializers import AllPresidentialCandidateSerializer, AllParliamentaryCandidateSerializer
 from elections.models import Election, ElectionPresidentialCandidate, \
-    PresidentialCandidateRegionalScore, PresidentialCandidateConstituencyScore
+    PresidentialCandidateRegionalVote, PresidentialCandidateConstituencyVote, ElectionParliamentaryCandidate, \
+    PresidentialCandidatePollingStationVote, ParliamentaryCandidatePollingStationVote
 from regions.api.serializers import AllRegionsSerializer, AllConstituenciesSerializer
+from regions.models import PollingStation
 
 
-class ElectionHistoryPresidentialCandidateSerializer(serializers.ModelSerializer):
+class ElectionParliamentaryCandidateSerializer(serializers.ModelSerializer):
+    candidate = AllPresidentialCandidateSerializer(many=False)
+    class Meta:
+        model = ElectionParliamentaryCandidate
+        fields = [
+            'election_parl_id',
+            'candidate',
+            'total_votes',
+            'total_votes_percent',
+            'created_at',
+        ]
+
+
+
+
+class ElectionPresidentialCandidateSerializer(serializers.ModelSerializer):
     candidate = AllPresidentialCandidateSerializer(many=False)
     class Meta:
         model = ElectionPresidentialCandidate
         fields = [
+            'election_prez_id',
             'candidate',
+            'total_votes',
             'total_votes_percent',
             'parliamentary_seat',
+            'created_at',
         ]
 
 
 
 class PresidentialCandidateRegionalScoreSerializer(serializers.ModelSerializer):
     region = AllRegionsSerializer(many=False)
-    hist_candidate = ElectionHistoryPresidentialCandidateSerializer(many=False)
+    hist_candidate = ElectionPresidentialCandidateSerializer(many=False)
     class Meta:
-        model = PresidentialCandidateRegionalScore
+        model = PresidentialCandidateRegionalVote
         fields = [
             'prez_candidate',
             'region',
@@ -33,9 +53,9 @@ class PresidentialCandidateRegionalScoreSerializer(serializers.ModelSerializer):
 
 class PresidentialCandidateConstituencyScoreSerializer(serializers.ModelSerializer):
     constituency = AllConstituenciesSerializer(many=False)
-    prez_candidate = ElectionHistoryPresidentialCandidateSerializer(many=False)
+    prez_candidate = ElectionPresidentialCandidateSerializer(many=False)
     class Meta:
-        model = PresidentialCandidateConstituencyScore
+        model = PresidentialCandidateConstituencyVote
         fields = [
             'prez_candidate',
             'constituency',
@@ -46,9 +66,9 @@ class PresidentialCandidateConstituencyScoreSerializer(serializers.ModelSerializ
 
 
 class ElectionDetailSerializer(serializers.ModelSerializer):
-    winner = ElectionHistoryPresidentialCandidateSerializer(many=False)
-    first_runner_up = ElectionHistoryPresidentialCandidateSerializer(many=False)
-    second_runner_up = ElectionHistoryPresidentialCandidateSerializer(many=False)
+    winner = ElectionPresidentialCandidateSerializer(many=False)
+    first_runner_up = ElectionPresidentialCandidateSerializer(many=False)
+    second_runner_up = ElectionPresidentialCandidateSerializer(many=False)
     presidential_candidates_regional = PresidentialCandidateRegionalScoreSerializer(many=True)
     presidential_candidates_constituency = PresidentialCandidateConstituencyScoreSerializer(many=True)
     class Meta:
@@ -76,3 +96,63 @@ class AllElectionSerializer(serializers.ModelSerializer):
 
 
         ]
+
+
+
+
+
+
+class PollingStationVoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PollingStation
+        fields = [
+            'polling_station_id',
+            'polling_station_name',
+        ]
+
+
+
+class ParliamentaryCandidatePollingStationVoteSerializer(serializers.ModelSerializer):
+    polling_station = PollingStationVoteSerializer(many=False)
+    candidate = ElectionParliamentaryCandidateSerializer(source='parl_candidate')  # Rename prez_candidate to candidate
+
+    class Meta:
+        model = ParliamentaryCandidatePollingStationVote
+        fields = [
+            'election',
+            'candidate',
+            'polling_station',
+            'total_votes',
+            'total_votes_percent',
+            'created_at',
+        ]
+
+
+
+class PresidentialCandidatePollingStationVoteSerializer(serializers.ModelSerializer):
+    polling_station = PollingStationVoteSerializer(many=False)
+    candidate = ElectionPresidentialCandidateSerializer(source='prez_candidate')  # Rename prez_candidate to candidate
+
+    class Meta:
+        model = PresidentialCandidatePollingStationVote
+        fields = [
+            'election',
+            'candidate',  # Use the renamed field here
+            'polling_station',
+            'total_votes',
+            'total_votes_percent',
+            'created_at',
+        ]
+
+class ElectionParliamentaryCandidateSerializer(serializers.ModelSerializer):
+    candidate = AllParliamentaryCandidateSerializer(many=False)
+    class Meta:
+        model = ElectionParliamentaryCandidate
+        fields = [
+            'election_parl_id',
+            'candidate',
+            'total_votes',
+            'total_votes_percent',
+            'created_at',
+        ]
+

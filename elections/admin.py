@@ -1,23 +1,23 @@
 from django.contrib import admin
 
 from elections.models import Election, ElectionPresidentialCandidate, \
-    PresidentialCandidateRegionalScore, PresidentialCandidateConstituencyScore, PresidentialCandidateZonalScore, \
-    PresidentialCandidatePollingStationScore, ParliamentaryCandidatePollingStationScore, \
-    ParliamentaryCandidateZonalScore, ParliamentaryCandidateConstituencyScore, ParliamentaryCandidateRegionalScore, \
+    PresidentialCandidateRegionalVote, PresidentialCandidateConstituencyVote, PresidentialCandidateElectoralAreaVote, \
+    PresidentialCandidatePollingStationVote, ParliamentaryCandidatePollingStationVote, \
+    ParliamentaryCandidateElectoralAreaVote, ParliamentaryCandidateConstituencyVote, ParliamentaryCandidateRegionalVote, \
     ElectionParliamentaryCandidate
 
 admin.site.register(Election)
 admin.site.register(ElectionPresidentialCandidate)
-admin.site.register(PresidentialCandidateRegionalScore)
-admin.site.register(PresidentialCandidateConstituencyScore)
-admin.site.register(PresidentialCandidateZonalScore)
-admin.site.register(PresidentialCandidatePollingStationScore)
+admin.site.register(PresidentialCandidateRegionalVote)
+admin.site.register(PresidentialCandidateConstituencyVote)
+admin.site.register(PresidentialCandidateElectoralAreaVote)
+admin.site.register(PresidentialCandidatePollingStationVote)
 
 
 
 admin.site.register(ElectionParliamentaryCandidate)
-admin.site.register(ParliamentaryCandidateRegionalScore)
-admin.site.register(ParliamentaryCandidateConstituencyScore)
-admin.site.register(ParliamentaryCandidateZonalScore)
-admin.site.register(ParliamentaryCandidatePollingStationScore)
+admin.site.register(ParliamentaryCandidateRegionalVote)
+admin.site.register(ParliamentaryCandidateConstituencyVote)
+admin.site.register(ParliamentaryCandidateElectoralAreaVote)
+admin.site.register(ParliamentaryCandidatePollingStationVote)
 

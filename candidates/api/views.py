@@ -1,12 +1,7 @@
-from datetime import datetime
 
-from celery import chain
-from django.conf import settings
+
 from django.contrib.auth import get_user_model
-from django.core.mail import EmailMessage
 from django.db.models import Q
-from django.utils import timezone
-from django.utils.dateparse import parse_time
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import authentication_classes, api_view, permission_classes
@@ -19,8 +14,6 @@ from candidates.api.serializers import AllParliamentaryCandidateSerializer, Parl
     AllPresidentialCandidateSerializer, PresidentialCandidateDetailSerializer
 from candidates.models import ParliamentaryCandidate, PresidentialCandidate
 from candidates.models import Party
-from regions.api.serializers import AllRegionsSerializer, RegionDetailSerializer, RegionalConstituenciesSerializer, \
-    AllConstituenciesSerializer, ConstituencyDetailSerializer
 from regions.models import Region, Constituency
 
 User = get_user_model()

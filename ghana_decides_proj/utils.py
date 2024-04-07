@@ -62,20 +62,20 @@ def unique_constituency_id_generator(instance):
         return None
     return constituency_id
 
-def unique_zone_id_generator(instance):
+def unique_electoral_area_id_generator(instance):
     """
-    This is for a zone_id field
+    This is for a electoral_area_id field
     :param instance:
     :return:
     """
     size = random.randint(5, 7)
-    zone_id = "ZN-" + random_string_generator(size=size, chars=string.ascii_uppercase + string.digits) + "-(C)"
+    electoral_area_id = "EA-" + random_string_generator(size=size, chars=string.ascii_uppercase + string.digits) + "-(C)"
 
     Klass = instance.__class__
-    qs_exists = Klass.objects.filter(zone_id=zone_id).exists()
+    qs_exists = Klass.objects.filter(electoral_area_id=electoral_area_id).exists()
     if qs_exists:
         return None
-    return zone_id
+    return electoral_area_id
 
 def unique_polling_station_id_generator(instance):
     """
@@ -154,6 +154,43 @@ def unique_election_id_generator(instance):
     if qs_exists:
         return None
     return election_id
+
+
+
+
+def unique_election_prez_id_generator(instance):
+    """
+    This is for a election_prez_id field
+    :param instance:
+    :return:
+    """
+    size = random.randint(5, 7)
+    election_prez_id = "ELEC-PREZ-" + random_string_generator(size=size, chars=string.ascii_uppercase + string.digits) + "-(E)"
+
+    Klass = instance.__class__
+    qs_exists = Klass.objects.filter(election_prez_id=election_prez_id).exists()
+    if qs_exists:
+        return None
+    return election_prez_id
+
+
+
+
+
+def unique_election_parl_id_generator(instance):
+    """
+    This is for a election_parl_id field
+    :param instance:
+    :return:
+    """
+    size = random.randint(5, 7)
+    election_parl_id = "ELEC-PARL-" + random_string_generator(size=size, chars=string.ascii_uppercase + string.digits) + "-(E)"
+
+    Klass = instance.__class__
+    qs_exists = Klass.objects.filter(election_parl_id=election_parl_id).exists()
+    if qs_exists:
+        return None
+    return election_parl_id
 
 
 

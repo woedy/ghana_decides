@@ -1,13 +1,7 @@
-from datetime import datetime
 
-from celery import chain
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.mail import EmailMessage
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
-from django.utils import timezone
-from django.utils.dateparse import parse_time
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import authentication_classes, api_view, permission_classes
@@ -17,9 +11,9 @@ from rest_framework.response import Response
 
 from activities.models import AllActivity
 from regions.api.serializers import AllRegionsSerializer, RegionDetailSerializer, RegionalConstituenciesSerializer, \
-    AllConstituenciesSerializer, ConstituencyDetailSerializer, ConstituencyZoneSerializer, ZoneSerializer, \
+    AllConstituenciesSerializer, ConstituencyDetailSerializer, ConstituencyElectoralAreaSerializer, ElectoralAreaSerializer, \
     PollingStationSerializer
-from regions.models import Region, Constituency, Zone, PollingStation, PollingStationVotersParticipation
+from regions.models import Region, Constituency, ElectoralArea, PollingStation, PollingStationVotersParticipation
 
 User = get_user_model()
 
@@ -61,6 +55,46 @@ def add_region_view(request):
         body="New Region added"
     )
     new_activity.save()
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_all_region_constituencies(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    regions_data = request.data.get('regions', [])
+
+    if not regions_data:
+        errors['regions'] = ['Regions data is required.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    for region_data in regions_data:
+        region_name = region_data.get('region_name', '')
+        capital = region_data.get('capital', '')
+        constituencies = region_data.get('constituencies', [])
+
+        if not region_name:
+            errors['region_name'] = ['Region name is required.']
+            continue
+
+        region = Region.objects.create(region_name=region_name, capital=capital)
+
+        for constituency_name in constituencies:
+            if not constituency_name:
+                continue
+            Constituency.objects.create(region=region, constituency_name=constituency_name)
 
     payload['message'] = "Successful"
     payload['data'] = data
@@ -433,7 +467,7 @@ def get_constituency_detail(request):
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])
-def get_constituency_zone(request):
+def get_constituency_electoral_area(request):
     payload = {}
     data = {}
     errors = {}
@@ -453,38 +487,38 @@ def get_constituency_zone(request):
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-    zones = Zone.objects.all().filter(constituency=constituency)
+    electoral_areas = ElectoralArea.objects.all().filter(constituency=constituency)
 
     # Search functionality
     search_query = request.query_params.get('search')
     if search_query:
-        zones = zones.filter(zone_name__icontains=search_query)
+        electoral_areas = electoral_areas.filter(electoral_area_name__icontains=search_query)
 
-    paginator = Paginator(zones, 10)  # 10 items per page
+    paginator = Paginator(electoral_areas, 10)  # 10 items per page
     page = request.query_params.get('page')
 
     try:
-        zones_page = paginator.page(page)
+        electoral_area_page = paginator.page(page)
     except PageNotAnInteger:
         # If page is not an integer, deliver first page.
-        zones_page = paginator.page(1)
+        electoral_area_page = paginator.page(1)
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
-        zones_page = paginator.page(paginator.num_pages)
+        electoral_area_page = paginator.page(paginator.num_pages)
 
-    zone_serializer = ConstituencyZoneSerializer(zones_page, many=True)
-    if zone_serializer:
-        _all_zones = zone_serializer.data
+    electoral_area_serializer = ConstituencyElectoralAreaSerializer(electoral_area_page, many=True)
+    if electoral_area_serializer:
+        _all_electoral_areas = electoral_area_serializer.data
 
     payload['message'] = "Successful"
-    payload['data'] = _all_zones
+    payload['data'] = _all_electoral_areas
     payload['pagination'] = {
         'total_items': paginator.count,
         'items_per_page': 10,
         'total_pages': paginator.num_pages,
-        'current_page': zones_page.number,
-        'has_next': zones_page.has_next(),
-        'has_previous': zones_page.has_previous(),
+        'current_page': electoral_area_page.number,
+        'has_next': electoral_area_page.has_next(),
+        'has_previous': electoral_area_page.has_previous(),
     }
 
     return Response(payload, status=status.HTTP_200_OK)
@@ -587,19 +621,19 @@ def delete_constituency_view(request):
 @api_view(['POST', ])
 @permission_classes([])
 @authentication_classes([])
-def add_zone_view(request):
+def add_electoral_area_view(request):
     payload = {}
     data = {}
     errors = {}
 
     constituency_id = request.data.get('constituency_id', '')
-    zone_name = request.data.get('zone_name', '')
+    electoral_area_name = request.data.get('electoral_area_name', '')
 
     if not constituency_id:
         errors['constituency_id'] = ['Constituency ID is required.']
 
-    if not zone_name:
-        errors['zone_name'] = ['Zone name is required.']
+    if not electoral_area_name:
+        errors['electoral_area_name'] = ['Electoral Area name is required.']
 
     try:
         constituency = Constituency.objects.get(constituency_id=constituency_id)
@@ -611,18 +645,18 @@ def add_zone_view(request):
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-    new_zone = Zone.objects.create(
+    new_electoral_area = ElectoralArea.objects.create(
         constituency=constituency,
-        zone_name=zone_name,
+        electoral_area_name=electoral_area_name,
     )
 
-    data['zone_id'] = new_zone.zone_id
+    data['electoral_area_id'] = new_electoral_area.electoral_area_id
 
     #
     new_activity = AllActivity.objects.create(
         user=User.objects.get(id=1),
-        subject="Zone Registration",
-        body="New Zone added"
+        subject="Electoral Area Registration",
+        body="New Electoral Area added"
     )
     new_activity.save()
 
@@ -637,43 +671,43 @@ def add_zone_view(request):
 @api_view(['GET', ])
 @permission_classes([])
 @authentication_classes([])
-def get_all_zones_view(request):
+def get_all_electoral_area_view(request):
     payload = {}
     data = {}
     errors = {}
 
-    # Retrieve all zones
-    zones = Zone.objects.all()
+    # Retrieve all electoral area
+    electoral_areas = ElectoralArea.objects.all()
 
     # Search functionality
     search_query = request.query_params.get('search')
     if search_query:
-        zones = zones.filter(zone_name__icontains=search_query)
+        electoral_areas = electoral_areas.filter(electoral_area_name__icontains=search_query)
 
     # Pagination
-    paginator = Paginator(zones, 10)  # 10 items per page
+    paginator = Paginator(electoral_areas, 10)  # 10 items per page
     page = request.query_params.get('page', 1)
 
     try:
-        zones_page = paginator.page(page)
+        electoral_areas_page = paginator.page(page)
     except PageNotAnInteger:
         # If page is not an integer, deliver first page.
-        zones_page = paginator.page(1)
+        electoral_areas_page = paginator.page(1)
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
-        zones_page = paginator.page(paginator.num_pages)
+        electoral_areas_page = paginator.page(paginator.num_pages)
 
-    zone_serializer = ZoneSerializer(zones_page, many=True)
+    electoral_areas_serializer = ElectoralAreaSerializer(electoral_areas_page, many=True)
 
     payload['message'] = "Successful"
-    payload['data'] = zone_serializer.data
+    payload['data'] = electoral_areas_serializer.data
     payload['pagination'] = {
         'total_items': paginator.count,
         'items_per_page': 10,
         'total_pages': paginator.num_pages,
-        'current_page': zones_page.number,
-        'has_next': zones_page.has_next(),
-        'has_previous': zones_page.has_previous(),
+        'current_page': electoral_areas_page.number,
+        'has_next': electoral_areas_page.has_next(),
+        'has_previous': electoral_areas_page.has_previous(),
     }
 
     return Response(payload, status=status.HTTP_200_OK)
@@ -682,32 +716,32 @@ def get_all_zones_view(request):
 @api_view(['GET', ])
 @permission_classes([])
 @authentication_classes([])
-def get_zone_detail_view(request):
+def get_electoral_area_detail_view(request):
     payload = {}
     data = {}
     errors = {}
 
-    zone_id = request.query_params.get('zone_id', None)
+    electoral_area_id = request.query_params.get('electoral_area_id', None)
 
-    if not zone_id:
-        errors['zone_id'] = ["Zone id required"]
+    if not electoral_area_id:
+        errors['electoral_area_id'] = ["Electoral Area id required"]
 
     try:
-        zone = Zone.objects.get(zone_id=zone_id)
-    except Zone.DoesNotExist:
-        errors['zone_id'] = ['Zone does not exist.']
+        electoral_area = ElectoralArea.objects.get(electoral_area_id=electoral_area_id)
+    except ElectoralArea.DoesNotExist:
+        errors['electoral_area_id'] = ['Electoral Area does not exist.']
 
     if errors:
         payload['message'] = "Errors"
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-    zone_serializer = ZoneSerializer(zone, many=False)
-    if zone_serializer:
-        zone_data = zone_serializer.data
+    electoral_area_serializer = ElectoralAreaSerializer(electoral_area, many=False)
+    if electoral_area_serializer:
+        electoral_area_data = electoral_area_serializer.data
 
     payload['message'] = "Successful"
-    payload['data'] = zone_data
+    payload['data'] = electoral_area_data
 
     return Response(payload, status=status.HTTP_200_OK)
 
@@ -716,42 +750,42 @@ def get_zone_detail_view(request):
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])
-def edit_zone_view(request):
+def edit_electoral_area_view(request):
     payload = {}
     data = {}
     errors = {}
 
-    zone_id = request.data.get('zone_id', '')
-    zone_name = request.data.get('zone_name', '')
+    electoral_area_id = request.data.get('electoral_area_id', '')
+    electoral_area_name = request.data.get('electoral_area_name', '')
     central_lat = request.data.get('central_lat', '')
     central_lng = request.data.get('central_lng', '')
 
-    if not zone_id:
-        errors['zone_id'] = ['Zone ID is required.']
+    if not electoral_area_id:
+        errors['electoral_area_id'] = ['Electoral Area is required.']
 
-    if not zone_name:
-        errors['zone_name'] = ['Zone name is required.']
+    if not electoral_area_name:
+        errors['electoral_area_name'] = ['Electoral Area is required.']
 
     try:
-        zone = Zone.objects.get(zone_id=zone_id)
-    except Zone.DoesNotExist:
-        errors['zone_id'] = ['Zone does not exist.']
+        electoral_area = ElectoralArea.objects.get(electoral_area_id=electoral_area_id)
+    except ElectoralArea.DoesNotExist:
+        errors['electoral_area_id'] = ['Electoral Area does not exist.']
 
     if errors:
         payload['message'] = "Errors"
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-    zone.zone_name = zone_name
-    zone.central_lat = central_lat
-    zone.central_lng = central_lng
-    zone.save()
+    electoral_area.electoral_area_name = electoral_area_name
+    electoral_area.central_lat = central_lat
+    electoral_area.central_lng = central_lng
+    electoral_area.save()
 
     # Create activity
     new_activity = AllActivity.objects.create(
         user=request.user,
-        subject="Zone Edited",
-        body=f"Zone '{zone_name}' edited"
+        subject="Electoral Area Edited",
+        body=f"Electoral '{electoral_area_name}' edited"
     )
     new_activity.save()
 
@@ -764,20 +798,20 @@ def edit_zone_view(request):
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])
-def delete_zone_view(request):
+def delete_electoral_view(request):
     payload = {}
     data = {}
     errors = {}
 
-    zone_id = request.data.get('zone_id', '')
+    electoral_area_id = request.data.get('electoral_area_id', '')
 
-    if not zone_id:
-        errors['zone_id'] = ['Zone ID is required.']
+    if not electoral_area_id:
+        errors['electoral_area_id'] = ['Electoral Area ID is required.']
 
     try:
-        zone = Zone.objects.get(zone_id=zone_id)
-    except Zone.DoesNotExist:
-        errors['zone_id'] = ['Zone does not exist.']
+        electoral_area = ElectoralArea.objects.get(electoral_area_id=electoral_area_id)
+    except ElectoralArea.DoesNotExist:
+        errors['electoral_area_id'] = ['Elctoral Area does not exist.']
 
     if errors:
         payload['message'] = "Errors"
@@ -787,12 +821,12 @@ def delete_zone_view(request):
     # Create activity
     new_activity = AllActivity.objects.create(
         user=request.user,
-        subject="Zone Deleted",
-        body=f"Zone '{zone.zone_name}' deleted"
+        subject="Electoral Area Deleted",
+        body=f"Electoral Area '{electoral_area.electoral_area_name}' deleted"
     )
     new_activity.save()
 
-    zone.delete()
+    electoral_area.delete()
 
     payload['message'] = "Successful"
     payload['data'] = {}
@@ -804,27 +838,27 @@ def delete_zone_view(request):
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])
-def get_zone_polling_stations(request):
+def get_electoral_area_polling_stations(request):
     payload = {}
     data = {}
     errors = {}
 
-    zone_id = request.query_params.get('zone_id', None)
+    electoral_area_id = request.query_params.get('electoral_area_id', None)
 
-    if not zone_id:
-        errors['zone_id'] = ["Zone id required"]
+    if not electoral_area_id:
+        errors['electoral_area_id'] = ["Electoral Area id required"]
 
     try:
-        zone = Zone.objects.get(zone_id=zone_id)
-    except Zone.DoesNotExist:
-        errors['zone_id'] = ['Zone does not exist.']
+        electoral_area = ElectoralArea.objects.get(electoral_area_id=electoral_area_id)
+    except ElectoralArea.DoesNotExist:
+        errors['electoral_area_id'] = ['Electoral Area does not exist.']
 
     if errors:
         payload['message'] = "Errors"
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-    polling_stations = PollingStation.objects.filter(zone=zone)
+    polling_stations = PollingStation.objects.filter(electoral_area=electoral_area)
 
     # Search functionality
     search_query = request.query_params.get('search')
@@ -871,21 +905,21 @@ def add_polling_station_view(request):
     data = {}
     errors = {}
 
-    zone_id = request.data.get('zone_id', '')
+    electoral_area_id = request.data.get('electoral_area_id', '')
     polling_station_name = request.data.get('polling_station_name', '')
     central_lat = request.data.get('central_lat', 0.0)
     central_lng = request.data.get('central_lng', 0.0)
 
-    if not zone_id:
-        errors['zone_id'] = ['Zone ID is required.']
+    if not electoral_area_id:
+        errors['electoral_area_id'] = ['Electoral Area ID is required.']
 
     if not polling_station_name:
         errors['polling_station_name'] = ['Polling station name is required.']
 
     try:
-        zone = Zone.objects.get(zone_id=zone_id)
-    except Zone.DoesNotExist:
-        errors['zone_id'] = ['Zone does not exist.']
+        electoral_area = ElectoralArea.objects.get(electoral_area_id=electoral_area_id)
+    except ElectoralArea.DoesNotExist:
+        errors['electoral_area_id'] = ['Electoral Area does not exist.']
 
     if errors:
         payload['message'] = "Errors"
@@ -893,7 +927,7 @@ def add_polling_station_view(request):
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
     new_polling_station = PollingStation.objects.create(
-        zone=zone,
+        electoral_area=electoral_area,
         polling_station_name=polling_station_name,
         central_lat=central_lat,
         central_lng=central_lng
@@ -905,7 +939,7 @@ def add_polling_station_view(request):
     new_activity = AllActivity.objects.create(
         user=request.user,
         subject="Polling Station Added",
-        body=f"Polling station '{polling_station_name}' added to zone {zone_id}"
+        body=f"Polling station '{polling_station_name}' added to electoral_area {electoral_area_id}"
     )
     new_activity.save()
 

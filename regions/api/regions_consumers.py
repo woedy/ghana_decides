@@ -80,7 +80,7 @@ class RegionsConsumers(AsyncJsonWebsocketConsumer):
             await self.channel_layer.group_send(
                 'data-stream',
                 {
-                    "type": "region_added",
+                    "type": "update_dashboard",
                 }
             )
 
@@ -112,7 +112,7 @@ class RegionsConsumers(AsyncJsonWebsocketConsumer):
             await self.channel_layer.group_send(
                 'data-stream',
                 {
-                    "type": "region_added",
+                    "type": "update_dashboard",
                 }
             )
 
@@ -146,7 +146,7 @@ class RegionsConsumers(AsyncJsonWebsocketConsumer):
             await self.channel_layer.group_send(
                 'data-stream',
                 {
-                    "type": "region_added",
+                    "type": "update_dashboard",
                 }
             )
 
@@ -179,7 +179,7 @@ class RegionsConsumers(AsyncJsonWebsocketConsumer):
             await self.channel_layer.group_send(
                 'data-stream',
                 {
-                    "type": "region_added",
+                    "type": "update_dashboard",
                 }
             )
 

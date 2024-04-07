@@ -7,9 +7,10 @@ from django.db.models import Q
 from rest_framework import status
 from rest_framework.response import Response
 
+from candidates.models import Party, PresidentialCandidate, ParliamentaryCandidate
 from ghana_decides_proj.exceptions import ClientError
 from regions.api.serializers import AllRegionsSerializer, AllConstituenciesSerializer
-from regions.models import Region, Constituency
+from regions.models import Region, Constituency, ElectoralArea, PollingStation
 
 User = get_user_model()
 
@@ -60,12 +61,8 @@ class DataAdminDashboardConsumers(AsyncJsonWebsocketConsumer):
             raise ClientError(204, "Something went wrong retrieving the data.")
 
 
-    async def region_added(self, event):
-        # Handle the region added event
-        # This method is triggered when a region is added in RegionsConsumers
-
-        payload = await self.get_data_admin_dashboard_data()
-        await self.send_json({"payload": payload})
+    async def update_dashboard(self, event):
+        await self.get_data_admin_dashboard_data()
 
     async def chat_message(self, event):
         await self.send_json(
@@ -114,12 +111,20 @@ def get_data_admin_dashboard_data():
 
 
     regions = Region.objects.all()
-
     constituencies = Constituency.objects.all()
+    electoral_areas = ElectoralArea.objects.all()
+    polling_stations = PollingStation.objects.all()
+    parties = Party.objects.all()
+    presidential_candidates = PresidentialCandidate.objects.all()
+    parliamentary_candidates = ParliamentaryCandidate.objects.all()
 
 
     payload['message'] = "Successful"
     payload['regions_count'] = regions.count()
     payload['constituencies_count'] = constituencies.count()
-
+    payload['electoral_areas_count'] = electoral_areas.count()
+    payload['polling_stations_count'] = polling_stations.count()
+    payload['parties_count'] = parties.count()
+    payload['presidential_candidates_count'] = presidential_candidates.count()
+    payload['parliamentary_candidates_count'] = parliamentary_candidates.count()
     return json.dumps(payload)

@@ -1,4 +1,3 @@
-
 from django.contrib.auth import get_user_model
 
 from rest_framework import status
@@ -11,7 +10,6 @@ from activities.models import AllActivity
 from elections.api.serializers import AllElectionSerializer, ElectionDetailSerializer
 from elections.models import Election
 from candidates.models import Party
-
 
 User = get_user_model()
 
@@ -38,8 +36,6 @@ def add_election_view(request):
     else:
         pass
 
-
-
     if errors:
         payload['message'] = "Errors"
         payload['errors'] = errors
@@ -63,7 +59,6 @@ def add_election_view(request):
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
-
 
 
 @api_view(['GET', ])
@@ -123,3 +118,51 @@ def get_election_details(request):
 
     return Response(payload, status=status.HTTP_200_OK)
 
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_election_2024_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    year = request.data.get('year', '')
+
+    if not year:
+        errors['year'] = ['Year is required.']
+
+    if year != "2024":
+        errors['year'] = ['Election year must be 2024.']
+
+    if year == "2024":
+        qs = Election.objects.filter(year=year)
+
+        if qs.exists():
+            errors['year'] = ['Election 2024 already exists.']
+        else:
+            pass
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    new_election = Election.objects.create(
+        year=year
+    )
+
+    data['election_id'] = new_election.election_id
+
+    #
+    new_activity = AllActivity.objects.create(
+        user=User.objects.get(id=1),
+        subject="Election Added",
+        body="New Election added"
+    )
+    new_activity.save()
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)

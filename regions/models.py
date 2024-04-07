@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models.signals import pre_save, post_save
 
 from ghana_decides_proj.utils import unique_region_id_generator, unique_constituency_id_generator, \
-    unique_zone_id_generator, unique_polling_station_id_generator
+    unique_electoral_area_id_generator, unique_polling_station_id_generator
 
 
 def get_file_ext(filepath):
@@ -108,16 +108,16 @@ class ConstituencyVotersParticipation(models.Model):
 
 
 
-class Zone(models.Model):
-    zone_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name='constituency_zones')
-    zone_name = models.CharField(max_length=255, blank=True, null=True)
+class ElectoralArea(models.Model):
+    electoral_area_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name='constituency_electoral_area')
+    electoral_area_name = models.CharField(max_length=255, blank=True, null=True)
 
     central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
     central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
-class ZonalVotersParticipation(models.Model):
-    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name='zonal_registered_voters')
+class ElectoralVotersParticipation(models.Model):
+    electoral_area = models.ForeignKey(ElectoralArea, on_delete=models.CASCADE, related_name='electoral_area_registered_voters')
     year = models.CharField(max_length=255, blank=True, null=True)
 
     registered_voters = models.IntegerField(default=0)
@@ -128,16 +128,16 @@ class ZonalVotersParticipation(models.Model):
 
 
 
-def pre_save_zone_id_receiver(sender, instance, *args, **kwargs):
-    if not instance.zone_id:
-        instance.zone_id = unique_zone_id_generator(instance)
+def pre_save_electoral_area_id_receiver(sender, instance, *args, **kwargs):
+    if not instance.electoral_area_id:
+        instance.electoral_area_id = unique_electoral_area_id_generator(instance)
 
-pre_save.connect(pre_save_zone_id_receiver, sender=Zone)
+pre_save.connect(pre_save_electoral_area_id_receiver, sender=ElectoralArea)
 
 
 class PollingStation(models.Model):
     polling_station_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name='zone_polling_stations')
+    electoral_area = models.ForeignKey(ElectoralArea, on_delete=models.CASCADE, related_name='electoral_area_polling_stations')
     polling_station_name = models.CharField(max_length=255, blank=True, null=True)
 
     central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)

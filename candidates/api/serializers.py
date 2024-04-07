@@ -36,15 +36,19 @@ class ParliamentaryCandidateDetailSerializer(serializers.ModelSerializer):
         ]
 
 class AllParliamentaryCandidateSerializer(serializers.ModelSerializer):
+    party = CandidatePartySerializer(many=False)
+    constituency = AllConstituenciesSerializer(many=False)
 
     class Meta:
         model = ParliamentaryCandidate
         fields = [
             'parl_can_id',
+            'constituency',
             'first_name',
             'last_name',
             'middle_name',
             'photo',
+            'party'
 
         ]
 

@@ -22,6 +22,7 @@ from activities.models import AllActivity
 
 from ghana_decides_proj.utils import generate_email_token, generate_random_otp_code
 from user_profile.models import UserProfile
+from ghana_decides_proj.tasks import send_generic_email
 
 User = get_user_model()
 
@@ -135,7 +136,7 @@ def register_user(request):
 
 
 
-        # Use Celery chain to execute tasks in sequence
+        #Use Celery chain to execute tasks in sequence
         # email_chain = chain(
         #     send_generic_email.si(subject, txt_, from_email, recipient_list, html_),
         # )
@@ -428,6 +429,139 @@ def register_correspondent(request):
 @api_view(['POST', ])
 @permission_classes([])
 @authentication_classes([])
+def register_presenter(request):
+
+    payload = {}
+    data = {}
+    errors = {}
+
+    if request.method == 'POST':
+        email = request.data.get('email', "").lower()
+        first_name = request.data.get('first_name', "")
+        last_name = request.data.get('last_name', "")
+        phone = request.data.get('phone', "")
+        #photo = request.FILES.get('photo')
+        #id_card = request.FILES.get('id_card')
+        photo = request.data.get('photo', "")
+        id_card = request.data.get('id_card', "")
+        password = request.data.get('password', "")
+        password2 = request.data.get('password2', "")
+
+
+        if not email:
+            errors['email'] = ['User Email is required.']
+        elif not is_valid_email(email):
+            errors['email'] = ['Valid email required.']
+        elif check_email_exist(email):
+            errors['email'] = ['Email already exists in our database.']
+
+        if not first_name:
+            errors['first_name'] = ['First Name is required.']
+
+        if not last_name:
+            errors['last_name'] = ['Last Name is required.']
+
+        if not phone:
+            errors['phone'] = ['Phone number is required.']
+
+
+        if not id_card:
+            errors['id_card'] = ['ID Card is required.']
+
+        if not password:
+            errors['password'] = ['Password is required.']
+
+        if not password2:
+            errors['password2'] = ['Password2 is required.']
+
+        if password != password2:
+            errors['password'] = ['Passwords dont match.']
+
+        if not is_valid_password(password):
+            errors['password'] = ['Password must be at least 8 characters long\n- Must include at least one uppercase letter,\n- One lowercase letter, one digit,\n- And one special character']
+
+        if errors:
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            print(payload)
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            data["user_id"] = user.user_id
+            data["email"] = user.email
+            data["first_name"] = user.first_name
+            data["last_name"] = user.last_name
+            data["user_type"] = user.user_type
+
+            user_profile = UserProfile.objects.create(
+                user=user,
+                phone=phone,
+                photo=photo,
+                id_card=id_card
+
+            )
+            user_profile.save()
+
+            user.user_type = "Presenter"
+            user.save()
+
+            data['phone'] = user_profile.phone
+            data['country'] = user_profile.country
+            data['photo'] = user_profile.photo.url
+
+        token = Token.objects.get(user=user).key
+        data['token'] = token
+
+        email_token = generate_email_token()
+
+        user = User.objects.get(email=email)
+        user.email_token = email_token
+        user.save()
+
+        context = {
+            'email_token': email_token,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        }
+
+        txt_ = get_template("registration/emails/verify.html").render(context)
+        html_ = get_template("registration/emails/verify.txt").render(context)
+
+        subject = 'EMAIL CONFIRMATION CODE'
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [user.email]
+
+
+
+        # Use Celery chain to execute tasks in sequence
+        # email_chain = chain(
+        #     send_generic_email.si(subject, txt_, from_email, recipient_list, html_),
+        # )
+        # # Execute the Celery chain asynchronously
+        # email_chain.apply_async()
+
+
+
+#
+        new_activity = AllActivity.objects.create(
+            user=user,
+            subject="Presenter Registration",
+            body=user.email + " Just created an account."
+        )
+        new_activity.save()
+
+        payload['message'] = "Successful"
+        payload['data'] = data
+
+    return Response(payload)
+
+
+@api_view(['POST', ])
+@permission_classes([])
+@authentication_classes([])
 def check_email_exist_view(request):
     payload = {}
     data = {}
@@ -630,11 +764,11 @@ def resend_email_verification(request):
     recipient_list = [user.email]
 
     # Use Celery chain to execute tasks in sequence
-    # email_chain = chain(
-    #     send_generic_email.si(subject, txt_, from_email, recipient_list, html_),
-    #  )
-    # # Execute the Celery chain asynchronously
-    # email_chain.apply_async()
+    email_chain = chain(
+        send_generic_email.si(subject, txt_, from_email, recipient_list, html_),
+     )
+    # Execute the Celery chain asynchronously
+    email_chain.apply_async()
 
     data["otp_code"] = otp_code
     data["emai"] = user.email
@@ -834,6 +968,97 @@ class DataAdminLogin(APIView):
         return Response(payload, status=status.HTTP_200_OK)
 
 
+
+class PresenterLogin(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        payload = {}
+        data = {}
+        errors = {}
+
+
+        email = request.data.get('email', '').lower()
+        password = request.data.get('password', '')
+        fcm_token = request.data.get('fcm_token', '')
+
+        if not email:
+            errors['email'] = ['Email is required.']
+
+        if not password:
+            errors['password'] = ['Password is required.']
+
+        if not fcm_token:
+            errors['fcm_token'] = ['FCM device token is required.']
+
+        try:
+            qs = User.objects.filter(email=email)
+        except User.DoesNotExist:
+            errors['email'] = ['User does not exist.']
+
+
+        if qs.exists():
+            not_active = qs.filter(email_verified=False)
+            if not_active:
+                errors['email'] = ["Please check your email to confirm your account or resend confirmation email."]
+
+            if qs.first().user_type != "Presenter":
+                errors['email'] = ["User is not a Presenter."]
+
+        if not check_password(email, password):
+            errors['password'] = ['Invalid Credentials']
+
+        user = authenticate(email=email, password=password)
+
+
+        if not user:
+            errors['email'] = ['Invalid Credentials']
+
+
+
+        if errors:
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+
+        try:
+            token = Token.objects.get(user=user)
+        except Token.DoesNotExist:
+            token = Token.objects.create(user=user)
+
+        try:
+            user_profile = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            user_profile = UserProfile.objects.create(user=user)
+
+        user_profile.active = True
+        user_profile.save()
+
+        user.fcm_token = fcm_token
+        user.save()
+
+        data["user_id"] = user.user_id
+        data["email"] = user.email
+        data["first_name"] = user.first_name
+        data["last_name"] = user.last_name
+        data["photo"] = user_profile.photo.url
+        data["token"] = token.key
+
+        payload['message'] = "Successful"
+        payload['data'] = data
+
+        new_activity = AllActivity.objects.create(
+            user=user,
+            subject="User Login",
+            body=user.email + " Just logged in."
+        )
+        new_activity.save()
+
+        return Response(payload, status=status.HTTP_200_OK)
+
+
 def check_password(email, password):
 
     try:
@@ -895,11 +1120,11 @@ class PasswordResetView(generics.GenericAPIView):
         recipient_list = [user.email]
 
         # Use Celery chain to execute tasks in sequence
-        # email_chain = chain(
-        #     send_generic_email.si(subject, txt_, from_email, recipient_list, html_),
-        #  )
-        # # Execute the Celery chain asynchronously
-        # email_chain.apply_async()
+        email_chain = chain(
+            send_generic_email.si(subject, txt_, from_email, recipient_list, html_),
+         )
+        # Execute the Celery chain asynchronously
+        email_chain.apply_async()
 
         data["otp_code"] = otp_code
         data["email"] = user.email
@@ -1014,11 +1239,11 @@ def resend_password_otp(request):
     recipient_list = [user.email]
 
     # Use Celery chain to execute tasks in sequence
-    # email_chain = chain(
-    #     send_generic_email.si(subject, txt_, from_email, recipient_list, html_),
-    #  )
-    # # Execute the Celery chain asynchronously
-    # email_chain.apply_async()
+    email_chain = chain(
+        send_generic_email.si(subject, txt_, from_email, recipient_list, html_),
+     )
+    # Execute the Celery chain asynchronously
+    email_chain.apply_async()
 
     data["otp_code"] = otp_code
     data["emai"] = user.email

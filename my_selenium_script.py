@@ -6,17 +6,17 @@ from selenium.webdriver.common.keys import Keys
 
 driver = webdriver.Chrome()
 
-driver.get("https://www.peacefmonline.com/")
+driver.get("https://ghanaelections.peacefmonline.com/pages/2020/parliament/ahafo/")
 
 print(
     driver.title
 )
 
-search = driver.find_element(By.NAME, "q")
-search.send_keys("test")
-search.send_keys(Keys.RETURN)
+elements = driver.find_elements(By.CLASS_NAME, "e_res_list1-npp")  # Note: find_elements instead of find_element
 
-print(driver.page_source)
+for element in elements:
+    print(element.text)
+
 time.sleep(5)
 
 driver.quit()
