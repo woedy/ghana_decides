@@ -3,7 +3,7 @@ from django.urls import re_path
 from candidates.api.parl_candidate_consumers import ParliamentaryCandidateConsumers
 from candidates.api.prez_candidate_consumers import PresidentialCandidateConsumers
 from chat import consumers
-from elections.api.consumers.election_dashboard_consumers import PresenterDashboardConsumers
+from elections.api.consumers.presenter_dashboard_consumers import PresenterDashboardConsumers
 from elections.api.consumers.elections_consumers import ElectionConsumers
 from elections.api.consumers.votes_consumers import Election2024Consumers
 from homepage.api.data_admin_dashboard_consumers import DataAdminDashboardConsumers

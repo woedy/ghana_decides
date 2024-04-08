@@ -13,6 +13,8 @@ class ElectionPresidentialCandidate(models.Model):
 
     candidate = models.ForeignKey(PresidentialCandidate, on_delete=models.CASCADE, related_name='presidential_candidates')
 
+    ballot_number = models.IntegerField(null=True, blank=True)
+
     total_votes = models.IntegerField(default=0)
     total_votes_percent = models.DecimalField(default=0.0, max_digits=5, decimal_places=1, null=True, blank=True)
     parliamentary_seat = models.IntegerField(default=0)

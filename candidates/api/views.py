@@ -361,6 +361,67 @@ def add_presidential_candidate(request):
 
     return Response(payload, status=status.HTTP_200_OK)
 
+
+
+@api_view(['POST', ])
+@permission_classes([])
+@authentication_classes([])
+def add_presidential_candidates_list(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    candidates = request.data.get('candidates', [])
+    for candidate in candidates:
+        first_name = candidate.get('first_name', '')
+        middle_name = candidate.get('middle_name', '')
+        last_name = candidate.get('last_name', '')
+        party = candidate.get('party', '')
+        gender = candidate.get('gender', '')
+
+        # Assuming you have a Party model with a name field
+        try:
+            party = Party.objects.get(party_initial=party)
+        except Party.DoesNotExist:
+            errors['party'] = ['Party does not exist.']
+
+        if not first_name:
+            errors['first_name'] = ['First name is required.']
+
+        if not last_name:
+            errors['last_name'] = ['Last Name is required.']
+
+        if not gender:
+            errors['gender'] = ['Gender is required.']
+
+        if errors:
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        new_prez_can = PresidentialCandidate.objects.create(
+            party=party,
+            first_name=first_name,
+            last_name=last_name,
+            middle_name=middle_name,
+            gender=gender,
+        )
+
+        data['prez_can_id'] = new_prez_can.id
+
+        new_activity = AllActivity.objects.create(
+            user=User.objects.get(id=1),
+            subject="Presidential Candidate Registration",
+            body="New Presidential Candidate added"
+        )
+        new_activity.save()
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])

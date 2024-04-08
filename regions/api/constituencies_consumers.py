@@ -250,33 +250,16 @@ def add_constituency(user_id, dataa):
     new_activity.save()
 
     # Retrieve all constituencies and paginate the results
-    all_constituencies = Constituency.objects.all()
-    paginator = Paginator(all_constituencies, 10)  # 10 items per page
-
-    page = ""
-
-    try:
-        constituencies = paginator.page(page)
-    except PageNotAnInteger:
-        constituencies = paginator.page(1)
-    except EmptyPage:
-        constituencies = paginator.page(paginator.num_pages)
+    all_constituencies = Constituency.objects.all().order_by("constituency_name")
 
     # Serialize the data
-    all_constituencies_serializer = AllConstituenciesSerializer(constituencies, many=True)
+    all_constituencies_serializer = AllConstituenciesSerializer(all_constituencies, many=True)
     _all_constituencies = all_constituencies_serializer.data
 
     # Prepare the payload
     payload['message'] = "Successful"
     payload['data'] = _all_constituencies
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': constituencies.number,
-        'has_next': constituencies.has_next(),
-        'has_previous': constituencies.has_previous(),
-    }
+
 
     return json.dumps(payload)
 
@@ -297,30 +280,13 @@ def get_all_constituencies(user_id, search, page):
             Q(initials__icontains=search_query)
         )
 
-    paginator = Paginator(all_constituencies, 10)  # 10 items per page
-
-    try:
-        constituencies = paginator.page(page)
-    except PageNotAnInteger:
-        constituencies = paginator.page(1)
-    except EmptyPage:
-        constituencies = paginator.page(paginator.num_pages)
-
     # Serialize the data
-    all_constituencies_serializer = AllConstituenciesSerializer(constituencies, many=True)
+    all_constituencies_serializer = AllConstituenciesSerializer(all_constituencies, many=True)
     _all_constituencies = all_constituencies_serializer.data
 
     # Prepare the payload
     payload['message'] = "Successful"
     payload['data'] = _all_constituencies
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': constituencies.number,
-        'has_next': constituencies.has_next(),
-        'has_previous': constituencies.has_previous(),
-    }
 
     return json.dumps(payload)
 
@@ -347,32 +313,15 @@ def delete_constituency(user_id, constituency_id):
 
     # Retrieve all constituencies and paginate the results
     all_constituencies = Constituency.objects.all()
-    paginator = Paginator(all_constituencies, 10)  # 10 items per page
-
-    page = ""
-
-    try:
-        constituencies = paginator.page(page)
-    except PageNotAnInteger:
-        constituencies = paginator.page(1)
-    except EmptyPage:
-        constituencies = paginator.page(paginator.num_pages)
 
     # Serialize the data
-    all_constituencies_serializer = AllConstituenciesSerializer(constituencies, many=True)
+    all_constituencies_serializer = AllConstituenciesSerializer(all_constituencies, many=True)
     _all_constituencies = all_constituencies_serializer.data
 
     # Prepare the payload
     payload['message'] = "Successful"
     payload['data'] = _all_constituencies
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': constituencies.number,
-        'has_next': constituencies.has_next(),
-        'has_previous': constituencies.has_previous(),
-    }
+
 
     return json.dumps(payload)
 
@@ -427,31 +376,14 @@ def edit_constituency(user_id, constituency_id, data):
 
     # Retrieve all constituencies and paginate the results
     all_constituencies = Constituency.objects.all()
-    paginator = Paginator(all_constituencies, 10)  # 10 items per page
-
-    page = ""
-
-    try:
-        constituencies = paginator.page(page)
-    except PageNotAnInteger:
-        constituencies = paginator.page(1)
-    except EmptyPage:
-        constituencies = paginator.page(paginator.num_pages)
 
     # Serialize the data
-    all_constituencies_serializer = AllConstituenciesSerializer(constituencies, many=True)
+    all_constituencies_serializer = AllConstituenciesSerializer(all_constituencies, many=True)
     _all_constituencies = all_constituencies_serializer.data
 
     # Prepare the payload
     payload['message'] = "Successful"
     payload['data'] = _all_constituencies
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': constituencies.number,
-        'has_next': constituencies.has_next(),
-        'has_previous': constituencies.has_previous(),
-    }
+
 
     return json.dumps(payload)

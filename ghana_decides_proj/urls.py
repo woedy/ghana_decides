@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/candidates/', include('candidates.api.urls', 'candidates_api')),
     path('api/elections/', include('elections.api.urls', 'elections_api')),
     path('api/search/', include('search.api.urls', 'search_api')),
+    path('api/settings/', include('settings.api.urls', 'settings_api')),
 ]
 
 if settings.DEBUG:

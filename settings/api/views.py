@@ -14,6 +14,8 @@ from candidates.api.serializers import PartyDetailSerializer, AllPartiesSerializ
     AllParliamentaryCandidateSerializer
 from candidates.models import Party, PresidentialCandidate, ParliamentaryCandidate, PartyFlagBearer, \
     PartyStandingCandidate
+from elections.models import PresidentialCandidatePollingStationVote, PresidentialCandidateElectoralAreaVote, \
+    PresidentialCandidateConstituencyVote, PresidentialCandidateRegionalVote, ElectionPresidentialCandidate
 
 User = get_user_model()
 
@@ -21,49 +23,39 @@ User = get_user_model()
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])
-def add_party_view(request):
+def reset_votes(request):
     payload = {}
     data = {}
     errors = {}
 
-    party_full_name = request.data.get('party_full_name', '')
-    party_logo = request.data.get('party_logo', '')
-    party_initial = request.data.get('party_initial', '')
-    year_formed = request.data.get('year_formed', '')
+    prez_polling_station_votes = PresidentialCandidatePollingStationVote.objects.all()
+    for vote in prez_polling_station_votes:
+        vote.delete()
 
-    if not party_full_name:
-        errors['party_full_name'] = ['Party Full Name is required.']
 
-    if not party_logo:
-        errors['party_logo'] = ['Party logo is required.']
+    electoral_area_vote = PresidentialCandidateElectoralAreaVote.objects.all()
+    for vote in electoral_area_vote:
+        vote.delete()
 
-    if not party_initial:
-        errors['party_initial'] = ['Party initials is required.']
 
-    if not party_initial:
-        errors['party_initial'] = ['Party initials is required.']
+    constituency_vote = PresidentialCandidateConstituencyVote.objects.all()
+    for vote in constituency_vote:
+        vote.delete()
 
-    if errors:
-        payload['message'] = "Errors"
-        payload['errors'] = errors
-        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+    constituency_vote = PresidentialCandidateRegionalVote.objects.all()
+    for vote in constituency_vote:
+        vote.delete()
 
-    new_party = Party.objects.create(
-        party_full_name=party_full_name,
-        party_logo=party_logo,
-        party_initial=party_initial,
-        year_formed=year_formed
-    )
 
-    data['party_id'] = new_party.party_id
 
-    #
-    new_activity = AllActivity.objects.create(
-        user=User.objects.get(id=1),
-        subject="Party Registration",
-        body="New Party added"
-    )
-    new_activity.save()
+    presidential_votes = ElectionPresidentialCandidate.objects.all()
+    for candidate in presidential_votes:
+        candidate.total_votes = 0
+        candidate.total_votes_percent = 0.0
+        candidate.parliamentary_seat = 0
+        candidate.save()
+
+
 
     payload['message'] = "Successful"
     payload['data'] = data

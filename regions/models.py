@@ -24,27 +24,10 @@ def upload_region_image_path(instance, filename):
     )
 
 
-REGION_NAME_CHOICES = (
-    ('Ahafo', 'Ahafo'),
-    ('Ashanti', 'Ashanti'),
-    ('Bono East', 'Bono East'),
-    ('Brong Ahafo', 'Brong Ahafo'),
-    ('Central', 'Central'),
-    ('Eastern', 'Eastern'),
-    ('Greater Accra', 'Greater Accra'),
-    ('Northern', 'Northern'),
-    ('North East', 'North East'),
-    ('Oti', 'Oti'),
-    ('Savannah', 'Savannah'),
-    ('Upper East', 'Upper East'),
-    ('Upper West', 'Upper West'),
-    ('Volta', 'Volta'),
-    ('Western', 'Western'),
-    ('Western North', 'Western North'),
-)
+
 class Region(models.Model):
     region_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    region_name = models.CharField(max_length=255, choices=REGION_NAME_CHOICES,  blank=True, null=True)
+    region_name = models.CharField(max_length=255,  blank=True, null=True)
     initials = models.CharField(max_length=255,  blank=True, null=True)
     capital = models.CharField(max_length=255,  blank=True, null=True)
     map_image = models.ImageField(upload_to=upload_region_image_path, null=True, blank=True)
@@ -73,13 +56,6 @@ class RegionalVotersParticipation(models.Model):
 
 
 
-CONSTITUENCY_NAME_CHOICES = (
-    ('Abetifi', 'Abetifi'),
-    ('Abirem', 'Abirem'),
-    ('Ablekuma Central', 'Ablekuma Central'),
-    ('Ablekuma North', 'Ablekuma North'),
-
-)
 
 class Constituency(models.Model):
     constituency_id = models.CharField(max_length=255, blank=True, null=True, unique=True)

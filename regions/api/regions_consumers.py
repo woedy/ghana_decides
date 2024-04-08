@@ -264,33 +264,13 @@ def add_region(user_id, dataa):
 
     all_regions = Region.objects.all()
 
-    paginator = Paginator(all_regions, 10)  # 10 items per page
-    page = ""
 
-    try:
-        regions = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        regions = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        regions = paginator.page(paginator.num_pages)
-
-    all_regions_serializer = AllRegionsSerializer(regions, many=True)
+    all_regions_serializer = AllRegionsSerializer(all_regions, many=True)
     if all_regions_serializer:
         _all_regions = all_regions_serializer.data
 
     payload['message'] = "Successful"
     payload['data'] = _all_regions
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': regions.number,
-        'has_next': regions.has_next(),
-        'has_previous': regions.has_previous(),
-    }
-
 
     return json.dumps(payload)
 
@@ -315,32 +295,14 @@ def get_all_regions(user_id, search, page):
             Q(initials__icontains=search_query)
         )
 
-    paginator = Paginator(all_regions, 10)  # 10 items per page
-    page = page
 
-    try:
-        regions = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        regions = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        regions = paginator.page(paginator.num_pages)
-
-    all_regions_serializer = AllRegionsSerializer(regions, many=True)
+    all_regions_serializer = AllRegionsSerializer(all_regions, many=True)
     if all_regions_serializer:
         _all_regions = all_regions_serializer.data
 
     payload['message'] = "Successful"
     payload['data'] = _all_regions
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': regions.number,
-        'has_next': regions.has_next(),
-        'has_previous': regions.has_previous(),
-    }
+
 
     return json.dumps(payload)
 
@@ -370,33 +332,12 @@ def delete_region(user_id, region_id):
 
     all_regions = Region.objects.all()
 
-    paginator = Paginator(all_regions, 10)  # 10 items per page
-    page = ""
-
-    try:
-        regions = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        regions = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        regions = paginator.page(paginator.num_pages)
-
-    all_regions_serializer = AllRegionsSerializer(regions, many=True)
+    all_regions_serializer = AllRegionsSerializer(all_regions, many=True)
     if all_regions_serializer:
         _all_regions = all_regions_serializer.data
 
     payload['message'] = "Successful"
     payload['data'] = _all_regions
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': regions.number,
-        'has_next': regions.has_next(),
-        'has_previous': regions.has_previous(),
-    }
-
     return json.dumps(payload)
 
 
@@ -457,32 +398,12 @@ def edit_region(user_id, region_id, dataa):
 
     all_regions = Region.objects.all()
 
-    paginator = Paginator(all_regions, 10)  # 10 items per page
-    page = ""
 
-    try:
-        regions = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        regions = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        regions = paginator.page(paginator.num_pages)
-
-    all_regions_serializer = AllRegionsSerializer(regions, many=True)
+    all_regions_serializer = AllRegionsSerializer(all_regions, many=True)
     if all_regions_serializer:
         _all_regions = all_regions_serializer.data
 
     payload['message'] = "Successful"
     payload['data'] = _all_regions
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': regions.number,
-        'has_next': regions.has_next(),
-        'has_previous': regions.has_previous(),
-    }
-
 
     return json.dumps(payload)

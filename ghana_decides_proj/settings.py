@@ -62,7 +62,8 @@ INSTALLED_APPS = [
     "video_call",
     "search",
     "chat",
-    "homepage"
+    "homepage",
+    "settings"
 ]
 
 

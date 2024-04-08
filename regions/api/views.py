@@ -180,32 +180,15 @@ def get_all_regions(request):
             Q(initials__icontains=search_query)
         )
 
-    paginator = Paginator(all_regions, 10)  # 10 items per page
-    page = request.GET.get('page')
 
-    try:
-        regions = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        regions = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        regions = paginator.page(paginator.num_pages)
 
-    all_regions_serializer = AllRegionsSerializer(regions, many=True)
+    all_regions_serializer = AllRegionsSerializer(all_regions, many=True)
     if all_regions_serializer:
         _all_regions = all_regions_serializer.data
 
     payload['message'] = "Successful"
     payload['data'] = _all_regions
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': regions.number,
-        'has_next': regions.has_next(),
-        'has_previous': regions.has_previous(),
-    }
+
 
     return Response(payload, status=status.HTTP_200_OK)
 
@@ -305,33 +288,13 @@ def get_region_constituencies(request):
     if search_query:
         constituencies = constituencies.filter(constituency_name__icontains=search_query)
 
-    paginator = Paginator(constituencies, 10)  # 10 items per page
-    page = request.query_params.get('page')
 
-    try:
-        constituencies_page = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        constituencies_page = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        constituencies_page = paginator.page(paginator.num_pages)
-
-    constituencies_serializer = RegionalConstituenciesSerializer(constituencies_page, many=True)
+    constituencies_serializer = RegionalConstituenciesSerializer(constituencies, many=True)
     if constituencies_serializer:
         _all_consti = constituencies_serializer.data
 
     payload['message'] = "Successful"
     payload['data'] = _all_consti
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': constituencies_page.number,
-        'has_next': constituencies_page.has_next(),
-        'has_previous': constituencies_page.has_previous(),
-    }
-
     return Response(payload, status=status.HTTP_200_OK)
 
 
@@ -494,32 +457,12 @@ def get_constituency_electoral_area(request):
     if search_query:
         electoral_areas = electoral_areas.filter(electoral_area_name__icontains=search_query)
 
-    paginator = Paginator(electoral_areas, 10)  # 10 items per page
-    page = request.query_params.get('page')
-
-    try:
-        electoral_area_page = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        electoral_area_page = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        electoral_area_page = paginator.page(paginator.num_pages)
-
-    electoral_area_serializer = ConstituencyElectoralAreaSerializer(electoral_area_page, many=True)
+    electoral_area_serializer = ConstituencyElectoralAreaSerializer(electoral_areas, many=True)
     if electoral_area_serializer:
         _all_electoral_areas = electoral_area_serializer.data
 
     payload['message'] = "Successful"
     payload['data'] = _all_electoral_areas
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': electoral_area_page.number,
-        'has_next': electoral_area_page.has_next(),
-        'has_previous': electoral_area_page.has_previous(),
-    }
 
     return Response(payload, status=status.HTTP_200_OK)
 
@@ -666,6 +609,45 @@ def add_electoral_area_view(request):
     return Response(payload, status=status.HTTP_200_OK)
 
 
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_electoral_areas_list_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    electoral_areas = request.data.get('electoral_areas', [])
+
+    if not electoral_areas:
+        errors['electoral_areas'] = ['Electoral areas data is required.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    for electoral_area in electoral_areas:
+        electoral_area_name = electoral_area.get('electoral_area_name', '')
+        constituency_id = electoral_area.get('constituency_id', '')
+
+        if not electoral_area_name:
+            errors['electoral_area'] = ['Electoral Area name is required.']
+            continue
+
+        consti = Constituency.objects.get(constituency_id=constituency_id)
+
+        electoral_area = ElectoralArea.objects.create(
+            electoral_area_name=electoral_area_name,
+            constituency=consti)
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
 
 
 @api_view(['GET', ])
@@ -684,31 +666,10 @@ def get_all_electoral_area_view(request):
     if search_query:
         electoral_areas = electoral_areas.filter(electoral_area_name__icontains=search_query)
 
-    # Pagination
-    paginator = Paginator(electoral_areas, 10)  # 10 items per page
-    page = request.query_params.get('page', 1)
-
-    try:
-        electoral_areas_page = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        electoral_areas_page = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        electoral_areas_page = paginator.page(paginator.num_pages)
-
-    electoral_areas_serializer = ElectoralAreaSerializer(electoral_areas_page, many=True)
+    electoral_areas_serializer = ElectoralAreaSerializer(electoral_areas, many=True)
 
     payload['message'] = "Successful"
     payload['data'] = electoral_areas_serializer.data
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': electoral_areas_page.number,
-        'has_next': electoral_areas_page.has_next(),
-        'has_previous': electoral_areas_page.has_previous(),
-    }
 
     return Response(payload, status=status.HTTP_200_OK)
 
@@ -865,32 +826,13 @@ def get_electoral_area_polling_stations(request):
     if search_query:
         polling_stations = polling_stations.filter(polling_station_name__icontains=search_query)
 
-    paginator = Paginator(polling_stations, 10)  # 10 items per page
-    page = request.query_params.get('page')
 
-    try:
-        polling_stations_page = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        polling_stations_page = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        polling_stations_page = paginator.page(paginator.num_pages)
-
-    polling_station_serializer = PollingStationSerializer(polling_stations_page, many=True)
+    polling_station_serializer = PollingStationSerializer(polling_stations, many=True)
     if polling_station_serializer:
         _all_polling_stations = polling_station_serializer.data
 
     payload['message'] = "Successful"
     payload['data'] = _all_polling_stations
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': polling_stations_page.number,
-        'has_next': polling_stations_page.has_next(),
-        'has_previous': polling_stations_page.has_previous(),
-    }
 
     return Response(payload, status=status.HTTP_200_OK)
 
@@ -947,6 +889,46 @@ def add_polling_station_view(request):
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_polling_stations_list_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    polling_stations = request.data.get('polling_stations', [])
+
+    if not polling_stations:
+        errors['polling_stations'] = ['Polling Stations data is required.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    for polling_station in polling_stations:
+        polling_station_name = polling_station.get('polling_station_name', '')
+        electoral_area_id = polling_station.get('electoral_area_id', '')
+
+        if not electoral_area_id:
+            errors['electoral_area_id'] = ['Electoral Area ID is required.']
+            continue
+
+        electoral_area = ElectoralArea.objects.get(electoral_area_id=electoral_area_id)
+
+        polling_station = PollingStation.objects.create(
+            electoral_area=electoral_area,
+            polling_station_name=polling_station_name)
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
 
 
 

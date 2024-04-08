@@ -127,6 +127,7 @@ class Party(models.Model):
     party_full_name = models.CharField(max_length=255, blank=True, null=True)
     party_initial = models.CharField(max_length=255, blank=True, null=True)
     year_formed = models.CharField(max_length=255, blank=True, null=True)
+    founder = models.CharField(max_length=255, blank=True, null=True)
     party_logo = models.ImageField(upload_to=upload_party_logo_path, null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
 

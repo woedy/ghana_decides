@@ -1,3 +1,5 @@
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -42,8 +44,11 @@ def add_election_presidential_candidate_view(request):
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
+    election = Election.objects.get(year=2024)
+
     new_election_prez_can = ElectionPresidentialCandidate.objects.create(
-        candidate=prez_can
+        candidate=prez_can,
+        election=election
     )
 
     data['election_prez_id'] = new_election_prez_can.election_prez_id
@@ -177,6 +182,9 @@ def add_election_presidential_vote_view(request):
     polling_station_id = request.data.get('polling_station_id', '')
     ballot = request.data.get('ballot', [])
 
+    print(polling_station_id)
+    print(ballot)
+
     if not polling_station_id:
         errors['polling_station_id'] = ['Polling Station id is required.']
 
@@ -206,7 +214,7 @@ def add_election_presidential_vote_view(request):
 
 
 
-    total_votes = sum(candidate['votes'] for candidate in ballot)
+    total_votes = sum(int(candidate['votes']) for candidate in ballot)
 
     for candidate in ballot:
 
@@ -361,6 +369,15 @@ def add_election_presidential_vote_view(request):
     # )
     # new_activity.save()
 
+    # Send a WebSocket message to trigger the consumer
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        'elections-2024-room-dashboard',
+        {
+            "type": "update_2024_election_dashboard",
+        }
+    )
+
     payload['message'] = "Successful"
     payload['data'] = data
 
@@ -368,7 +385,7 @@ def add_election_presidential_vote_view(request):
 
 
 def calculate_percentage(candidate_votes, total_votes):
-    return (candidate_votes / total_votes) * 100
+    return (int(candidate_votes) / int(total_votes)) * 100
 
 
 
