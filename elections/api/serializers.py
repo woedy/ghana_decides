@@ -38,9 +38,9 @@ class ElectionPresidentialCandidateSerializer(serializers.ModelSerializer):
 
 
 
-class PresidentialCandidateRegionalScoreSerializer(serializers.ModelSerializer):
+class PresidentialCandidateRegionalVoteSerializer(serializers.ModelSerializer):
     region = AllRegionsSerializer(many=False)
-    hist_candidate = ElectionPresidentialCandidateSerializer(many=False)
+    prez_candidate = ElectionPresidentialCandidateSerializer(many=False)
     class Meta:
         model = PresidentialCandidateRegionalVote
         fields = [
@@ -51,7 +51,7 @@ class PresidentialCandidateRegionalScoreSerializer(serializers.ModelSerializer):
             'parliamentary_seat',
         ]
 
-class PresidentialCandidateConstituencyScoreSerializer(serializers.ModelSerializer):
+class PresidentialCandidateConstituencyVoteSerializer(serializers.ModelSerializer):
     constituency = AllConstituenciesSerializer(many=False)
     prez_candidate = ElectionPresidentialCandidateSerializer(many=False)
     class Meta:
@@ -69,8 +69,8 @@ class ElectionDetailSerializer(serializers.ModelSerializer):
     winner = ElectionPresidentialCandidateSerializer(many=False)
     first_runner_up = ElectionPresidentialCandidateSerializer(many=False)
     second_runner_up = ElectionPresidentialCandidateSerializer(many=False)
-    presidential_candidates_regional = PresidentialCandidateRegionalScoreSerializer(many=True)
-    presidential_candidates_constituency = PresidentialCandidateConstituencyScoreSerializer(many=True)
+    presidential_candidates_regional = PresidentialCandidateRegionalVoteSerializer(many=True)
+    presidential_candidates_constituency = PresidentialCandidateConstituencyVoteSerializer(many=True)
     class Meta:
         model = Election
         fields = [

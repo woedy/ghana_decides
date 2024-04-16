@@ -42,6 +42,13 @@ def pre_save_region_id_receiver(sender, instance, *args, **kwargs):
 pre_save.connect(pre_save_region_id_receiver, sender=Region)
 
 
+class RegionLayerCoordinate(models.Model):
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='region_coordinates')
+    lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+    lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
+
+
 class RegionalVotersParticipation(models.Model):
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='region_registered_voters')
     year = models.CharField(max_length=255, blank=True, null=True)
@@ -64,6 +71,12 @@ class Constituency(models.Model):
 
     central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
     central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
+
+class ConstituencyLayerCoordinate(models.Model):
+    constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name='constituency_coordinates')
+    lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+    lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
 
 def pre_save_constituency_id_receiver(sender, instance, *args, **kwargs):
@@ -91,6 +104,13 @@ class ElectoralArea(models.Model):
 
     central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
     central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
+
+class ElectoralAreaLayerCoordinate(models.Model):
+    electoral_area = models.ForeignKey(ElectoralArea, on_delete=models.CASCADE, related_name='electoral_area_coordinates')
+    lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+    lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
 
 class ElectoralVotersParticipation(models.Model):
     electoral_area = models.ForeignKey(ElectoralArea, on_delete=models.CASCADE, related_name='electoral_area_registered_voters')
@@ -125,6 +145,12 @@ def pre_save_polling_station_id_receiver(sender, instance, *args, **kwargs):
         instance.polling_station_id = unique_polling_station_id_generator(instance)
 
 pre_save.connect(pre_save_polling_station_id_receiver, sender=PollingStation)
+
+
+class PollingStationLayerCoordinate(models.Model):
+    polling_station = models.ForeignKey(PollingStation, on_delete=models.CASCADE, related_name='polling_station_coordinates')
+    lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+    lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
 
 

@@ -3,6 +3,7 @@ from django.urls import re_path
 from candidates.api.parl_candidate_consumers import ParliamentaryCandidateConsumers
 from candidates.api.prez_candidate_consumers import PresidentialCandidateConsumers
 from chat import consumers
+from elections.api.consumers.live_map_consumers import LiveMapConsumers
 from elections.api.consumers.presenter_dashboard_consumers import PresenterDashboardConsumers
 from elections.api.consumers.elections_consumers import ElectionConsumers
 from elections.api.consumers.votes_consumers import Election2024Consumers
@@ -31,6 +32,7 @@ websocket_urlpatterns = [
     re_path(r"ws/elections-consumers/", ElectionConsumers.as_asgi()),
     re_path(r"ws/2024-election-consumers/", Election2024Consumers.as_asgi()),
     re_path(r"ws/presenter-dashboard/", PresenterDashboardConsumers.as_asgi()),
+    re_path(r"ws/live-map-consumer/", LiveMapConsumers.as_asgi()),
 
 
 ]

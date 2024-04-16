@@ -5,33 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5c1ec882-703d-4d4b-9918-2c7a8a3a99a2" name="Changes" comment="Connecting Websocket v1">
-      <change afterPath="$PROJECT_DIR$/settings/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings/api/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings/api/serializers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings/api/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings/api/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings/views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/elections/api/consumers/live_map_consumers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/candidates/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/candidates/api/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/candidates/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/candidates/api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/candidates/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/candidates/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/api/consumers/election_dashboard_consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/consumers/presenter_dashboard_consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/api/election_view.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/election_view.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/elections/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ghana_decides_proj/routing.py" beforeDir="false" afterPath="$PROJECT_DIR$/ghana_decides_proj/routing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ghana_decides_proj/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ghana_decides_proj/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ghana_decides_proj/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/ghana_decides_proj/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parties/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/parties/api/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parties/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/parties/api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/regions/api/constituencies_consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/api/constituencies_consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/regions/api/regions_consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/api/regions_consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/regions/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/api/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/regions/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/api/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/regions/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/regions/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -50,7 +28,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="authentication-1" />
+        <entry key="$PROJECT_DIR$" value="building-models-1" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -64,17 +42,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Python.main.executor": "Run",
-    "Python.my_selenium_script.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "building-models-1",
-    "last_opened_file_path": "C:/Users/LENOVO/Documents/SamaPro/Backend/GhanaDecides/ghana_desides_server/ghana_desides_server/settings"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.my_selenium_script.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;websockets-2&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/LENOVO/Documents/SamaPro/Backend/GhanaDecides/ghana_desides_server/ghana_desides_server/settings&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\LENOVO\Documents\SamaPro\Backend\GhanaDecides\ghana_desides_server\ghana_desides_server\settings" />
@@ -141,7 +119,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-5a2391486177-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.13763.11" />
+        <option value="bundled-python-sdk-09665e90c3a7-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.15026.15" />
       </set>
     </attachedChunks>
   </component>
@@ -194,7 +172,15 @@
       <option name="project" value="LOCAL" />
       <updated>1712478073173</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Connecting Websocket v1">
+      <option name="closed" value="true" />
+      <created>1712589605461</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1712589605463</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -212,6 +198,11 @@
           <url>file://$PROJECT_DIR$/main.py</url>
           <line>8</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/elections/api/consumers/live_map_consumers.py</url>
+          <line>35</line>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
