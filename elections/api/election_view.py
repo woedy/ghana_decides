@@ -29,6 +29,7 @@ def add_election_presidential_candidate_view(request):
     errors = {}
 
     prez_can_id = request.data.get('prez_can_id', '')
+    ballot_number = request.data.get('ballot_number', '')
 
     if not prez_can_id:
         errors['prez_can_id'] = ['Presidential Candidate id is required.']
@@ -66,6 +67,53 @@ def add_election_presidential_candidate_view(request):
 
     return Response(payload, status=status.HTTP_200_OK)
 
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_election_presidential_candidate_list_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    candidates = request.data.get('candidates', [])
+    for candidate in candidates:
+        prez_can_id = candidate.get('prez_can_id', '')
+        ballot_number = candidate.get('ballot_number', '')
+
+        if not prez_can_id:
+            errors['prez_can_id'] = ['Presidential Candidate id is required.']
+
+        try:
+            prez_can = PresidentialCandidate.objects.get(prez_can_id=prez_can_id)
+        except PresidentialCandidate.DoesNotExist:
+            errors['prez_can_id'] = ['Presidential candidate does not exist.']
+
+        if errors:
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        election = Election.objects.get(year=2024)
+
+        new_election_prez_can = ElectionPresidentialCandidate.objects.create(
+            candidate=prez_can,
+            election=election,
+            ballot_number=ballot_number
+        )
+
+        data['election_prez_id'] = new_election_prez_can.id
+
+        new_activity = AllActivity.objects.create(
+            user=User.objects.get(id=1),
+            subject="Election Presidential Candidate Added",
+            body="New Election Presidential Candidate added"
+        )
+        new_activity.save()
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
 
 
 
@@ -82,7 +130,7 @@ def get_all_election_presidential_candidate_view(request):
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-    all_election_prez_can = ElectionPresidentialCandidate.objects.all().order_by("total_votes")
+    all_election_prez_can = ElectionPresidentialCandidate.objects.all().order_by("ballot_number")
 
     all_election_prez_can_serializer = ElectionPresidentialCandidateSerializer(all_election_prez_can, many=True)
     if all_election_prez_can_serializer:
@@ -105,15 +153,28 @@ def add_election_parliamentary_candidate_view(request):
     data = {}
     errors = {}
 
+    constituency_id = request.data.get('constituency_id', '')
     parl_can_id = request.data.get('parl_can_id', '')
+    ballot_number = request.data.get('ballot_number', '')
+
+    if not constituency_id:
+        errors['constituency_id'] = ['Candidate Constituency id is required.']
 
     if not parl_can_id:
         errors['parl_can_id'] = ['Parliamentary Candidate id is required.']
+
+    if not ballot_number:
+        errors['ballot_number'] = ['Ballot Number is required.']
 
     try:
         parl_can = ParliamentaryCandidate.objects.get(parl_can_id=parl_can_id)
     except:
         errors['parl_can_id'] = ['Parliamentary candidate does not exist.']
+
+    try:
+        constituency = Constituency.objects.get(constituency_id=constituency_id)
+    except:
+        errors['constituency_id'] = ['Constituency does not exist.']
 
 
     if errors:
@@ -121,8 +182,14 @@ def add_election_parliamentary_candidate_view(request):
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
+    election = Election.objects.get(year=2024)
+
     new_election_parl_can = ElectionParliamentaryCandidate.objects.create(
-        candidate=parl_can
+        election=election,
+        constituency=constituency,
+        candidate=parl_can,
+        ballot_number=ballot_number
+
     )
 
     data['election_parl_id'] = new_election_parl_can.election_parl_id
@@ -141,6 +208,66 @@ def add_election_parliamentary_candidate_view(request):
     return Response(payload, status=status.HTTP_200_OK)
 
 
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_election_parliamentary_candidate_list_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    candidates = request.data.get('candidates', [])
+    for candidate in candidates:
+        constituency_id = candidate.get('constituency_id', '')
+        parl_can_id = candidate.get('parl_can_id', '')
+        ballot_number = candidate.get('ballot_number', '')
+
+        if not constituency_id:
+            errors['constituency_id'] = ['Candidate Constituency id is required.']
+
+        if not parl_can_id:
+            errors['parl_can_id'] = ['Parliamentary Candidate id is required.']
+
+        if not ballot_number:
+            errors['ballot_number'] = ['Ballot Number is required.']
+
+        try:
+            parl_can = ParliamentaryCandidate.objects.get(parl_can_id=parl_can_id)
+        except ParliamentaryCandidate.DoesNotExist:
+            errors['parl_can_id'] = ['Parliamentary candidate does not exist.']
+
+        try:
+            constituency = Constituency.objects.get(constituency_id=constituency_id)
+        except Constituency.DoesNotExist:
+            errors['constituency_id'] = ['Constituency does not exist.']
+
+        if errors:
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        election = Election.objects.get(year=2024)
+
+        new_election_parl_can = ElectionParliamentaryCandidate.objects.create(
+            election=election,
+            constituency=constituency,
+            candidate=parl_can,
+            ballot_number=ballot_number
+        )
+
+        data['election_parl_id'] = new_election_parl_can.id
+
+        new_activity = AllActivity.objects.create(
+            user=User.objects.get(id=1),
+            subject="Election Parliamentary Candidate Added",
+            body="New Election Parliamentary Candidate added"
+        )
+        new_activity.save()
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
 
 
 
@@ -152,12 +279,24 @@ def get_all_election_parliamentary_candidate_view(request):
     data = {}
     errors = {}
 
+    constituency_id = request.GET.get('constituency_id', None)
+
+    if not constituency_id:
+        errors['constituency_id'] = ['Constituency ID  is required.']
+
+
+    try:
+        constituency = Constituency.objects.get(constituency_id=constituency_id)
+    except:
+        errors['constituency_id'] = ['Constituency does not exist.']
+
+
     if errors:
         payload['message'] = "Errors"
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-    all_election_parl_can = ElectionParliamentaryCandidate.objects.all().order_by("total_votes")
+    all_election_parl_can = ElectionParliamentaryCandidate.objects.all().filter(constituency=constituency).order_by("ballot_number")
 
     all_election_parl_can_serializer = ElectionParliamentaryCandidateSerializer(all_election_parl_can, many=True)
     if all_election_parl_can_serializer:
@@ -503,7 +642,7 @@ def add_election_parliamentary_vote_view(request):
 
 
 
-    total_votes = sum(candidate['votes'] for candidate in ballot)
+    total_votes = sum(int(candidate['votes']) for candidate in ballot)
 
     for candidate in ballot:
 
@@ -662,6 +801,17 @@ def add_election_parliamentary_vote_view(request):
     #     body="New Election Parliamentary Candidate added"
     # )
     # new_activity.save()
+
+
+    # Send a WebSocket message to trigger the consumer
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        'elections-2024-room-dashboard',
+        {
+            "type": "update_2024_election_dashboard",
+        }
+    )
+
 
     payload['message'] = "Successful"
     payload['data'] = data

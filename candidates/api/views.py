@@ -100,6 +100,85 @@ def add_parliamentary_candidate(request):
     return Response(payload, status=status.HTTP_200_OK)
 
 
+@api_view(['POST', ])
+@permission_classes([])
+@authentication_classes([])
+def add_parliamentary_candidate_list(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    candidates = request.data.get('candidates', [])
+    for candidate in candidates:
+        constituency_id = candidate.get('constituency_id', '')
+        party_id = candidate.get('party_id', '')
+        first_name = candidate.get('first_name', '')
+        last_name = candidate.get('last_name', '')
+        middle_name = candidate.get('middle_name', '')
+        photo = candidate.get('photo', '')
+        gender = candidate.get('gender', '')
+        candidate_type = candidate.get('candidate_type', '')
+
+        if not constituency_id:
+            errors['constituency_id'] = ['Constituency id is required.']
+
+        if not party_id:
+            errors['party_id'] = ['Party id is required.']
+
+        if not first_name:
+            errors['first_name'] = ['First name is required.']
+
+        if not last_name:
+            errors['last_name'] = ['Last Name is required.']
+
+        if not photo:
+            errors['photo'] = ['Photo is required.']
+
+        if not gender:
+            errors['gender'] = ['Gender is required.']
+
+        if not candidate_type:
+            errors['candidate_type'] = ['Candidate type is required.']
+
+        try:
+            party = Party.objects.get(party_id=party_id)
+        except Party.DoesNotExist:
+            errors['party_id'] = ['Party does not exist.']
+
+        try:
+            constituency = Constituency.objects.get(constituency_id=constituency_id)
+        except Constituency.DoesNotExist:
+            errors['constituency_id'] = ['Constituency does not exist.']
+
+        if errors:
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        new_parl_can = ParliamentaryCandidate.objects.create(
+            constituency=constituency,
+            party=party,
+            first_name=first_name,
+            last_name=last_name,
+            middle_name=middle_name,
+            photo=photo,
+            gender=gender,
+            candidate_type=candidate_type,
+        )
+
+        data['parl_can_id'] = new_parl_can.id
+
+        new_activity = AllActivity.objects.create(
+            user=User.objects.get(id=1),
+            subject="Parliamentary Candidate Registration",
+            body="New Parliamentary Candidate added"
+        )
+        new_activity.save()
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
@@ -191,24 +270,24 @@ def get_all_parliamentary_candidate(request):
             Q(middle_name__icontains=search_query)
         )
 
-    paginator = PageNumberPagination()
-    paginator.page_size = page_size
+    #paginator = PageNumberPagination()
+    #paginator.page_size = page_size
 
-    result_page = paginator.paginate_queryset(all_parl_can, request)
+    #result_page = paginator.paginate_queryset(all_parl_can, request)
 
-    all_parl_can_serializer = AllParliamentaryCandidateSerializer(result_page, many=True)
+    all_parl_can_serializer = AllParliamentaryCandidateSerializer(all_parl_can, many=True)
     _all_parl_can = all_parl_can_serializer.data
 
     payload['message'] = "Successful"
     payload['data'] = _all_parl_can
-    payload['pagination'] = {
-        'total_items': paginator.page.paginator.count,
-        'items_per_page': paginator.page_size,
-        'total_pages': paginator.page.paginator.num_pages,
-        'current_page': paginator.page.number,
-        'has_next': paginator.page.has_next(),
-        'has_previous': paginator.page.has_previous(),
-    }
+    # payload['pagination'] = {
+    #     'total_items': paginator.page.paginator.count,
+    #     'items_per_page': paginator.page_size,
+    #     'total_pages': paginator.page.paginator.num_pages,
+    #     'current_page': paginator.page.number,
+    #     'has_next': paginator.page.has_next(),
+    #     'has_previous': paginator.page.has_previous(),
+    # }
 
     return Response(payload, status=status.HTTP_200_OK)
 

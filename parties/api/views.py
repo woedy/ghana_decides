@@ -138,32 +138,32 @@ def get_all_parties_view(request):
     if search_query:
         parties = parties.filter(party_full_name__icontains=search_query)
 
-    paginator = Paginator(parties, 10)  # 10 items per page
-    page = request.query_params.get('page')
+    # paginator = Paginator(parties, 10)  # 10 items per page
+    # page = request.query_params.get('page')
+#
+    # try:
+    #     parties_page = paginator.page(page)
+    # except PageNotAnInteger:
+    #     # If page is not an integer, deliver first page.
+    #     parties_page = paginator.page(1)
+    # except EmptyPage:
+    #     # If page is out of range (e.g. 9999), deliver last page of results.
+    #     parties_page = paginator.page(paginator.num_pages)
 
-    try:
-        parties_page = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        parties_page = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        parties_page = paginator.page(paginator.num_pages)
-
-    party_serializer = AllPartiesSerializer(parties_page, many=True)
+    party_serializer = AllPartiesSerializer(parties, many=True)
     if party_serializer:
         _all_parties = party_serializer.data
 
     payload['message'] = "Successful"
     payload['data'] = _all_parties
-    payload['pagination'] = {
-        'total_items': paginator.count,
-        'items_per_page': 10,
-        'total_pages': paginator.num_pages,
-        'current_page': parties_page.number,
-        'has_next': parties_page.has_next(),
-        'has_previous': parties_page.has_previous(),
-    }
+    #payload['pagination'] = {
+    #    'total_items': paginator.count,
+    #    'items_per_page': 10,
+    #    'total_pages': paginator.num_pages,
+    #    'current_page': parties_page.number,
+    #    'has_next': parties_page.has_next(),
+    #    'has_previous': parties_page.has_previous(),
+    #}
 
     return Response(payload, status=status.HTTP_200_OK)
 

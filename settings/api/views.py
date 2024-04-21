@@ -15,7 +15,9 @@ from candidates.api.serializers import PartyDetailSerializer, AllPartiesSerializ
 from candidates.models import Party, PresidentialCandidate, ParliamentaryCandidate, PartyFlagBearer, \
     PartyStandingCandidate
 from elections.models import PresidentialCandidatePollingStationVote, PresidentialCandidateElectoralAreaVote, \
-    PresidentialCandidateConstituencyVote, PresidentialCandidateRegionalVote, ElectionPresidentialCandidate
+    PresidentialCandidateConstituencyVote, PresidentialCandidateRegionalVote, ElectionPresidentialCandidate, \
+    ParliamentaryCandidatePollingStationVote, ParliamentaryCandidateElectoralAreaVote, \
+    ParliamentaryCandidateConstituencyVote, ParliamentaryCandidateRegionalVote, ElectionParliamentaryCandidate
 
 User = get_user_model()
 
@@ -32,9 +34,18 @@ def reset_votes(request):
     for vote in prez_polling_station_votes:
         vote.delete()
 
+    parl_polling_station_votes = ParliamentaryCandidatePollingStationVote.objects.all()
+    for vote in parl_polling_station_votes:
+        vote.delete()
+
 
     electoral_area_vote = PresidentialCandidateElectoralAreaVote.objects.all()
     for vote in electoral_area_vote:
+        vote.delete()
+
+
+    parl_electoral_area_vote = ParliamentaryCandidateElectoralAreaVote.objects.all()
+    for vote in parl_electoral_area_vote:
         vote.delete()
 
 
@@ -42,8 +53,16 @@ def reset_votes(request):
     for vote in constituency_vote:
         vote.delete()
 
-    constituency_vote = PresidentialCandidateRegionalVote.objects.all()
-    for vote in constituency_vote:
+    parl_constituency_vote = ParliamentaryCandidateConstituencyVote.objects.all()
+    for vote in parl_constituency_vote:
+        vote.delete()
+
+    regional_vote = PresidentialCandidateRegionalVote.objects.all()
+    for vote in regional_vote:
+        vote.delete()
+
+    parl_regional_vote = ParliamentaryCandidateRegionalVote.objects.all()
+    for vote in parl_regional_vote:
         vote.delete()
 
 
@@ -55,7 +74,11 @@ def reset_votes(request):
         candidate.parliamentary_seat = 0
         candidate.save()
 
-
+    parliamentary_votes = ElectionParliamentaryCandidate.objects.all()
+    for candidate in presidential_votes:
+        candidate.total_votes = 0
+        candidate.total_votes_percent = 0.0
+        candidate.save()
 
     payload['message'] = "Successful"
     payload['data'] = data

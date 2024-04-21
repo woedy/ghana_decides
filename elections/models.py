@@ -40,6 +40,11 @@ class ElectionParliamentaryCandidate(models.Model):
     candidate = models.ForeignKey(ParliamentaryCandidate, on_delete=models.CASCADE, related_name='parliamentary_candidates')
     election = models.ForeignKey("Election", on_delete=models.CASCADE, related_name='parl_candidate_election_year')
 
+    constituency = models.ForeignKey(Constituency, blank=True, null=True, on_delete=models.SET_NULL, related_name='election_parliamentary_can_constituency')
+
+
+    ballot_number = models.IntegerField(null=True, blank=True)
+
     total_votes = models.IntegerField(default=0)
     total_votes_percent = models.DecimalField(default=0.0, max_digits=5, decimal_places=1, null=True, blank=True)
 

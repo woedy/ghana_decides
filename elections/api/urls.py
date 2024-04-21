@@ -3,7 +3,8 @@ from django.urls import path
 from elections.api.election_view import add_election_presidential_candidate_view, \
     get_all_election_presidential_candidate_view, add_election_parliamentary_candidate_view, \
     get_all_election_parliamentary_candidate_view, add_election_presidential_vote_view, \
-    get_election_2024_dashboard_view, add_election_parliamentary_vote_view
+    get_election_2024_dashboard_view, add_election_parliamentary_vote_view, \
+    add_election_presidential_candidate_list_view, add_election_parliamentary_candidate_list_view
 from elections.api.views import add_election_view, get_all_election_history_view, get_election_details, \
     add_election_2024_view
 
@@ -17,10 +18,14 @@ urlpatterns = [
     path('add-election-2024/', add_election_2024_view, name="add_election_view"),
 
     path('add-election-presidential-candidate/', add_election_presidential_candidate_view, name="add_election_presidential_candidate_view"),
+    path('add-election-presidential-candidate-list/', add_election_presidential_candidate_list_view, name="add_election_presidential_candidate_list_view"),
     path('get-all-election-presidential-candidates/', get_all_election_presidential_candidate_view, name="get_all_election_presidential_candidate_view"),
 
     path('add-election-parliamentary-candidate/', add_election_parliamentary_candidate_view,
          name="add_election_parliamentary_candidate_view"),
+
+    path('add-election-parliamentary-candidate-list/', add_election_parliamentary_candidate_list_view,
+         name="add_election_parliamentary_candidate_list_view"),
     path('get-all-election-parliamentary-candidates/', get_all_election_parliamentary_candidate_view,
          name="get_all_election_parliamentary_candidate_view"),
 

@@ -151,6 +151,7 @@ class ElectionParliamentaryCandidateSerializer(serializers.ModelSerializer):
         fields = [
             'election_parl_id',
             'candidate',
+            'ballot_number',
             'total_votes',
             'total_votes_percent',
             'created_at',

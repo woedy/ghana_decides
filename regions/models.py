@@ -35,6 +35,11 @@ class Region(models.Model):
     central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
 
+    def __str__(self):
+        return f"{self.region_name}"
+
+
+
 def pre_save_region_id_receiver(sender, instance, *args, **kwargs):
     if not instance.region_id:
         instance.region_id = unique_region_id_generator(instance)
@@ -72,6 +77,9 @@ class Constituency(models.Model):
     central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
     central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.constituency_name} - {self.region.region_name}"
+
 
 class ConstituencyLayerCoordinate(models.Model):
     constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name='constituency_coordinates')
@@ -105,6 +113,8 @@ class ElectoralArea(models.Model):
     central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
     central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.electoral_area_name} - {self.constituency.constituency_name} - {self.constituency.region.region_name}"
 
 class ElectoralAreaLayerCoordinate(models.Model):
     electoral_area = models.ForeignKey(ElectoralArea, on_delete=models.CASCADE, related_name='electoral_area_coordinates')
@@ -138,6 +148,9 @@ class PollingStation(models.Model):
 
     central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
     central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.polling_station_name} - {self.electoral_area.electoral_area_name} - {self.electoral_area.constituency.constituency_name} - {self.electoral_area.constituency.region.region_name}"
 
 
 def pre_save_polling_station_id_receiver(sender, instance, *args, **kwargs):

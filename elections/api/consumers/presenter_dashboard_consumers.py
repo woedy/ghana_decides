@@ -155,12 +155,14 @@ def get_presenter_dashboard():
 
         presidential_result_chart.append(candidate_data)
 
+    all_votes = []
+
     all_prez_incoming_vote_candidates = PresidentialCandidatePollingStationVote.objects.all().order_by("-created_at")
     all_prez_incoming_vote_candidates_serializer = PresidentialCandidatePollingStationVoteSerializer(all_prez_incoming_vote_candidates,
                                                                                       many=True)
     if all_prez_incoming_vote_candidates_serializer:
         all_prez_incoming_vote_candidates = all_prez_incoming_vote_candidates_serializer.data
-        incoming_votes.extend(all_prez_incoming_vote_candidates)
+        all_votes.extend(all_prez_incoming_vote_candidates)
 
     all_parl_incoming_vote_candidates = ParliamentaryCandidatePollingStationVote.objects.all().order_by("-created_at")
     all_parl_incoming_vote_candidates_serializer = ParliamentaryCandidatePollingStationVoteSerializer(
@@ -168,7 +170,13 @@ def get_presenter_dashboard():
         many=True)
     if all_parl_incoming_vote_candidates_serializer:
         all_parl_incoming_vote_candidates = all_parl_incoming_vote_candidates_serializer.data
-        incoming_votes.extend(all_parl_incoming_vote_candidates)
+        all_votes.extend(all_parl_incoming_vote_candidates)
+
+    print(len(all_votes))
+
+    incoming_votes = sorted(all_votes, key=lambda x: x['created_at'])
+
+    print(len(incoming_votes))
 
     data["first_presidential_candidate"] = first_presidential_candidate
     data["second_presidential_candidate"] = second_presidential_candidate
