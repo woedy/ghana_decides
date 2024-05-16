@@ -31,6 +31,13 @@ class Region(models.Model):
     initials = models.CharField(max_length=255,  blank=True, null=True)
     capital = models.CharField(max_length=255,  blank=True, null=True)
     map_image = models.ImageField(upload_to=upload_region_image_path, null=True, blank=True)
+
+    election_year = models.CharField(max_length=255, blank=True, null=True)
+
+
+    parliamentary_submitted = models.BooleanField(default=False)
+    presidential_submitted = models.BooleanField(default=False)
+
     central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
     central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
@@ -74,6 +81,12 @@ class Constituency(models.Model):
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='region_constituencies')
     constituency_name = models.CharField(max_length=255, blank=True, null=True)
 
+    election_year = models.CharField(max_length=255, blank=True, null=True)
+
+
+    parliamentary_submitted = models.BooleanField(default=False)
+    presidential_submitted = models.BooleanField(default=False)
+
     central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
     central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
@@ -110,6 +123,12 @@ class ElectoralArea(models.Model):
     constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name='constituency_electoral_area')
     electoral_area_name = models.CharField(max_length=255, blank=True, null=True)
 
+    election_year = models.CharField(max_length=255, blank=True, null=True)
+
+
+    parliamentary_submitted = models.BooleanField(default=False)
+    presidential_submitted = models.BooleanField(default=False)
+
     central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
     central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
@@ -145,9 +164,14 @@ class PollingStation(models.Model):
     polling_station_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
     electoral_area = models.ForeignKey(ElectoralArea, on_delete=models.CASCADE, related_name='electoral_area_polling_stations')
     polling_station_name = models.CharField(max_length=255, blank=True, null=True)
+    election_year = models.CharField(max_length=255, blank=True, null=True)
+
+    parliamentary_submitted = models.BooleanField(default=False)
+    presidential_submitted = models.BooleanField(default=False)
 
     central_lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
     central_lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
+
 
     def __str__(self):
         return f"{self.polling_station_name} - {self.electoral_area.electoral_area_name} - {self.electoral_area.constituency.constituency_name} - {self.electoral_area.constituency.region.region_name}"

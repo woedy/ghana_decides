@@ -145,7 +145,7 @@ def get_live_map_data():
     election_year = 2024
     election_level = "Presidential"
     result_state = "General"
-    display_name = "All Regions"
+    region_name = "All Regions"
 
     display_names_list = []
 
@@ -168,15 +168,15 @@ def get_live_map_data():
             display_names_list.append(region.region_name)
 
     if result_state == "General":
-        data['display_name'] = "All Regions"
+        data['region_name'] = "All Regions"
     if result_state == "Region":
-        data['display_name'] = region_name
+        data['region_name'] = region_name
     elif result_state == "Constituency":
-        data['display_name'] = constituency_name
+        data['region_name'] = constituency_name
     elif result_state == "Electoral Area":
-        data['display_name'] = electoral_area_name
+        data['region_name'] = electoral_area_name
     elif result_state == "Polling Station":
-        data['display_name'] = polling_station_name
+        data['region_name'] = polling_station_name
 
 
     data['election_year'] = election_year
@@ -202,12 +202,15 @@ def get_map_filter_data(dataa):
     print(dataa)
 
 
+
     election_year = dataa['election_year']
     election_level = dataa['election_level']
     result_state = dataa['result_state']
-    display_name = dataa['display_name']
+    region_name = dataa['region_name']
+    parl_parties = {}
+    candidates = []
 
-    display_names_list = None
+    display_names_list = []
 
 
     region_name = None
@@ -218,38 +221,99 @@ def get_map_filter_data(dataa):
     if result_state == "General":
         election_2024 = Election.objects.all().filter(year=election_year).first()
 
-        general_prez_can_votes = ElectionPresidentialCandidate.objects.filter(election=election_2024).order_by("-total_votes")
-        general_prez_can_votes_serializer = ElectionPresidentialCandidateSerializer(general_prez_can_votes,
+        if election_level == "Presidential":
+            general_prez_can_votes = ElectionPresidentialCandidate.objects.filter(election=election_2024).order_by("-total_votes")
+            general_prez_can_votes_serializer = ElectionPresidentialCandidateSerializer(general_prez_can_votes,
                                                                                          many=True)
-        candidates = general_prez_can_votes_serializer.data
+            candidates = general_prez_can_votes_serializer.data
+
+            regions = Region.objects.all()
+            for region in regions:
+                display_names_list.append(region.region_name)
+
+
+        if election_level == "Parliamentary":
+            all_election_2024_presidential_candidates = ElectionPresidentialCandidate.objects.all().filter(
+                election=election_2024).order_by("-total_votes")
+
+            if all_election_2024_presidential_candidates:
+                _first_presidential_candidate = all_election_2024_presidential_candidates[0]
+                first_prez_party = _first_presidential_candidate.candidate.party
+
+
+            ## First arliamentary
+            first_prez_parl_can = (ElectionParliamentaryCandidate.objects
+                                   .filter(election=election_2024)
+                                   .filter(won=True)
+                                   .filter(candidate__party=_first_presidential_candidate.candidate.party)
+                                   .order_by('-created_at')
+                                   )
+
+            parl_party_1 = {
+                "party_full_name": first_prez_party.party_full_name,
+                "party_initial": first_prez_party.party_initial,
+                "party_logo": first_prez_party.party_logo.url,
+                "seats": len(first_prez_parl_can),
+            }
+
+            parl_parties["first_parl_party"] = parl_party_1
+
+            ##### Second PARLIAMENTARY
+
+            if len(all_election_2024_presidential_candidates) > 1:
+                _second_presidential_candidate = all_election_2024_presidential_candidates[1]
+                second_prez_party = _second_presidential_candidate.candidate.party
+
+            second_prez_parl_can = (ElectionParliamentaryCandidate.objects
+                                    .filter(election=election_2024)
+                                    .filter(won=True)
+                                    .filter(candidate__party=second_prez_party)
+                                    .order_by('-created_at')
+                                    )
+
+            parl_party_2 = {
+                "party_full_name": second_prez_party.party_full_name,
+                "party_initial": second_prez_party.party_initial,
+                "party_logo": second_prez_party.party_logo.url,
+                "seats": len(second_prez_parl_can),
+            }
+
+            parl_parties["second_parl_party"] = parl_party_2
+
+
+
+
     elif result_state == "Region":
-        print(dataa)
+
         election_2024 = Election.objects.all().filter(year=election_year).first()
         #region = Region.objects.all().get(region_name=region_name)
 
 
-        regional_prez_can_votes = PresidentialCandidateRegionalVote.objects.filter(election=election_2024).order_by("-total_votes")
+        regional_prez_can_votes = PresidentialCandidateRegionalVote.objects.filter(election=election_year).order_by("-total_votes")
         region_name = regional_prez_can_votes.first().region.region_name
         regional_prez_can_votes_serializer = PresidentialCandidateRegionalVoteSerializer(regional_prez_can_votes, many=True)
         candidates = regional_prez_can_votes_serializer.data
 
     if result_state == "General":
-        data['display_name'] = "All Regions"
+        data['region_name'] = "All Regions"
     if result_state == "Region":
-        data['display_name'] = region_name
+        data['region_name'] = region_name
     elif result_state == "Constituency":
-        data['display_name'] = constituency_name
+        data['region_name'] = constituency_name
     elif result_state == "Electoral Area":
-        data['display_name'] = electoral_area_name
+        data['region_name'] = electoral_area_name
     elif result_state == "Polling Station":
-        data['display_name'] = polling_station_name
+        data['region_name'] = polling_station_name
 
 
     data['election_year'] = election_year
     data['election_level'] = election_level
     data['result_state'] = result_state
     data['candidates'] = candidates
+    data['parl_parties'] = parl_parties
     data['display_names_list'] = display_names_list
+
+
 
 
     payload['message'] = "Successful"

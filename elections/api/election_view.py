@@ -500,6 +500,29 @@ def add_election_presidential_vote_view(request):
         candidate.save()
 
 
+    # Declear Polling station submitted
+    polling_station.presidential_submitted = True
+    polling_station.save()
+
+    # Check if all polling station is submitted in electoral Area and check Electoral Area Submitted
+    electoral_area_polling_station_submit_qs = PollingStation.objects.filter(electoral_area=electoral_area).filter(presidential_submitted=False)
+    if not electoral_area_polling_station_submit_qs.exists():
+        electoral_area.presidential_submitted = True
+        electoral_area.save()
+
+
+    # Check if all Electoral Area is submitted in Constituency and check Constituency Submitted
+    constituency_electoral_area_submit_qs = ElectoralArea.objects.filter(constituency=constituency).filter(presidential_submitted=False)
+    if not constituency_electoral_area_submit_qs.exists():
+        constituency.presidential_submitted = True
+        constituency.save()
+
+
+    # Check if all Constituencies is submitted in Region and check Region Submitted
+    region_constituency_submit_qs = Constituency.objects.filter(region=region).filter(presidential_submitted=False)
+    if not region_constituency_submit_qs.exists():
+        region.presidential_submitted = True
+        region.save()
 
     # new_activity = AllActivity.objects.create(
     #     user=User.objects.get(id=1),
@@ -605,10 +628,12 @@ def get_election_2024_dashboard_view(request):
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])
-def add_election_parliamentary_vote_view(request):
+def add_election_parliamentary_vote_view222(request):
     payload = {}
     data = {}
     errors = {}
+
+    old_leading_candidate_party = None
 
     polling_station_id = request.data.get('polling_station_id', '')
     ballot = request.data.get('ballot', [])
@@ -640,9 +665,20 @@ def add_election_parliamentary_vote_view(request):
     constituency = electoral_area.constituency
     region = constituency.region
 
+    _old_leading_candidate = ParliamentaryCandidateConstituencyVote.objects.filter(
+        election=election,
+        constituency=constituency
+    ).order_by('-total_votes').first()
+
+    if _old_leading_candidate.total_votes != 0:
+        old_leading_candidate = _old_leading_candidate
+    else:
+        old_leading_candidate = None
+
 
 
     total_votes = sum(int(candidate['votes']) for candidate in ballot)
+
 
     for candidate in ballot:
 
@@ -773,10 +809,286 @@ def add_election_parliamentary_vote_view(request):
 
     all_prez_candidates = ElectionPresidentialCandidate.objects.all()
 
+    if old_leading_candidate == None:
+        for candidate in all_prez_candidates:
+            if candidate.candidate.party.party_id == leading_candidate_party.party_id:
+                candidate.parliamentary_seat = int(candidate.parliamentary_seat) + 1
+                candidate.save()
+
+    elif old_leading_candidate != None:
+        if old_leading_candidate:
+            pass
+
+
     for candidate in all_prez_candidates:
-        if candidate.candidate.party.party_id == leading_candidate_party.party_id:
-            candidate.parliamentary_seat = int(candidate.parliamentary_seat) + 1
-            candidate.save()
+        if old_leading_candidate == None:
+            if candidate.candidate.party.party_id == leading_candidate_party.party_id:
+                candidate.parliamentary_seat = int(candidate.parliamentary_seat) + 1
+                candidate.save()
+        elif old_leading_candidate != None:
+            if old_leading_candidate == leading_candidate:
+                pass
+           # elif old_leading_candidate != leading_candidate:
+
+
+
+
+
+    # Calculate Region Percentage Share
+    # region_candidates = ParliamentaryCandidateRegionalVote.objects.filter(
+    #     election=election,
+    #     region=region
+    # )
+    # r_total_votes = sum(candidate.total_votes for candidate in region_candidates)
+    # for candidate in region_candidates:
+    #     percentage_share = calculate_percentage(candidate.total_votes, r_total_votes)
+    #     candidate.total_votes_percent = percentage_share
+    #     candidate.save()
+
+
+
+    # new_activity = AllActivity.objects.create(
+    #     user=User.objects.get(id=1),
+    #     subject="Election Parliamentary Candidate Added",
+    #     body="New Election Parliamentary Candidate added"
+    # )
+    # new_activity.save()
+
+
+    # Send a WebSocket message to trigger the consumer
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        'elections-2024-room-dashboard',
+        {
+            "type": "update_2024_election_dashboard",
+        }
+    )
+
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_election_parliamentary_vote_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    polling_station_id = request.data.get('polling_station_id', '')
+    ballot = request.data.get('ballot', [])
+
+    if not polling_station_id:
+        errors['polling_station_id'] = ['Polling Station id is required.']
+
+    if not ballot:
+        errors['ballot'] = ['Ballot is required.']
+
+    try:
+        polling_station = PollingStation.objects.get(polling_station_id=polling_station_id)
+    except:
+        errors['polling_station_id'] = ['Polling Station does not exist.']
+
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    # Get Election Year (2024)
+    election = Election.objects.get(year="2024")
+
+
+    # Get polling station, electoral area, constituency, Region
+
+    electoral_area = polling_station.electoral_area
+    constituency = electoral_area.constituency
+    region = constituency.region
+
+    total_votes = sum(int(candidate['votes']) for candidate in ballot)
+
+    for candidate in ballot:
+
+        # Add vote to candidate votes
+        election_parl_candidate = ElectionParliamentaryCandidate.objects.get(
+            election_parl_id=candidate['election_parl_id'])
+
+        election_parl_candidate.total_votes = int(election_parl_candidate.total_votes) + int(candidate['votes'])
+        election_parl_candidate.save()
+
+        polling_station_vote = ParliamentaryCandidatePollingStationVote.objects.filter(
+                election=election,
+                parl_candidate=election_parl_candidate,
+                polling_station=polling_station)
+
+        if polling_station_vote.exists():
+            print(polling_station)
+            errors['polling_station_id'] = ['Election result for this Polling Station already exists.']
+
+        if errors:
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        polling_station_vote = ParliamentaryCandidatePollingStationVote.objects.create(
+            election=election,
+            parl_candidate=election_parl_candidate,
+            polling_station=polling_station)
+
+        polling_station_vote.total_votes = int(polling_station_vote.total_votes) + int(candidate['votes'])
+        percentage_share = calculate_percentage(candidate['votes'], total_votes)
+        polling_station_vote.total_votes_percent = percentage_share
+        polling_station_vote.save()
+
+        #     # Add vote to Electoral Area
+        electoral_area_vote = ParliamentaryCandidateElectoralAreaVote.objects.filter(
+            election=election,
+                parl_candidate=election_parl_candidate,
+                electoral_area=electoral_area
+                ).first()
+
+        if electoral_area_vote is not None:
+            electoral_area_vote.total_votes = int(electoral_area_vote.total_votes) + int(candidate['votes'])
+            electoral_area_vote.save()
+        else:
+            electoral_area_vote = ParliamentaryCandidateElectoralAreaVote.objects.create(
+                election=election,
+                parl_candidate=election_parl_candidate,
+                electoral_area=electoral_area
+                )
+            electoral_area_vote.total_votes = int(candidate['votes'])
+            electoral_area_vote.save()
+
+        # Add vote to Constituency
+
+
+        constituency_vote = ParliamentaryCandidateConstituencyVote.objects.filter(
+            election=election,
+                parl_candidate=election_parl_candidate,
+                constituency=constituency
+                ).first()
+
+        if constituency_vote is not None:
+            constituency_vote.total_votes = int(constituency_vote.total_votes) + int(candidate['votes'])
+            constituency_vote.save()
+        else:
+            constituency_vote = ParliamentaryCandidateConstituencyVote.objects.create(
+                election=election,
+                parl_candidate=election_parl_candidate,
+                constituency=constituency
+                )
+            constituency_vote.total_votes = int(candidate['votes'])
+            constituency_vote.save()
+
+
+
+        # Add vote to Region
+
+        region_vote = ParliamentaryCandidateRegionalVote.objects.filter(
+            election=election,
+                parl_candidate=election_parl_candidate,
+                region=region
+                ).first()
+
+        if region_vote is not None:
+            region_vote.total_votes = int(region_vote.total_votes) + int(candidate['votes'])
+            region_vote.save()
+        else:
+            region_vote = ParliamentaryCandidateRegionalVote.objects.create(
+                election=election,
+                parl_candidate=election_parl_candidate,
+                region=region
+                )
+            region_vote.total_votes = int(candidate['votes'])
+            region_vote.save()
+
+
+
+    # Calculate Electoral Area Percentage Share
+    electoral_area_candidates = ParliamentaryCandidateElectoralAreaVote.objects.filter(
+        election=election,
+        electoral_area=electoral_area
+    )
+    ea_total_votes = sum(candidate.total_votes for candidate in electoral_area_candidates)
+    for candidate in electoral_area_candidates:
+        percentage_share = calculate_percentage(candidate.total_votes, ea_total_votes)
+        candidate.total_votes_percent = percentage_share
+        candidate.save()
+
+
+
+
+    # Calculate Constituency Percentage Share
+    constituency_candidates = ParliamentaryCandidateConstituencyVote.objects.filter(
+        election=election,
+        constituency=constituency
+    )
+    c_total_votes = sum(candidate.total_votes for candidate in constituency_candidates)
+    for candidate in constituency_candidates:
+        percentage_share = calculate_percentage(candidate.total_votes, c_total_votes)
+        candidate.total_votes_percent = percentage_share
+        candidate.save()
+
+        #########################################################
+
+    # Declear Polling station submitted
+    polling_station.parliamentary_submitted = True
+    polling_station.save()
+
+    # Check if all polling station is submitted in electoral Area and check Electoral Area Submitted
+    electoral_area_polling_station_submit_qs = PollingStation.objects.filter(electoral_area=electoral_area).filter(election_year=election.year).filter(
+        parliamentary_submitted=False)
+    if not electoral_area_polling_station_submit_qs.exists():
+
+        electoral_area.parliamentary_submitted = True
+        electoral_area.save()
+
+    # Check if all Electoral Area is submitted in Constituency and check Constituency Submitted
+    constituency_electoral_area_submit_qs = ElectoralArea.objects.filter(constituency=constituency).filter(election_year=election.year).filter(
+        parliamentary_submitted=False)
+    if not constituency_electoral_area_submit_qs.exists():
+        constituency.parliamentary_submitted = True
+        constituency.save()
+
+        ##### Set Parliamentary seat holder in constituency
+        leading_candidate = ParliamentaryCandidateConstituencyVote.objects.filter(
+            election=election,
+            constituency=constituency
+        ).order_by('-total_votes').first()
+
+        leading_candidate_party = leading_candidate.parl_candidate.candidate.party
+
+        all_prez_candidates = ElectionPresidentialCandidate.objects.all()
+
+        for candidate in all_prez_candidates:
+            if candidate.candidate.party.party_id == leading_candidate_party.party_id:
+                candidate.parliamentary_seat = int(candidate.parliamentary_seat) + 1
+                candidate.save()
+
+        leading_candidate.parl_candidate.won = True
+        leading_candidate.parl_candidate.save()
+        leading_candidate.save()
+
+
+
+
+
+
+    # Check if all Constituencies is submitted in Region and check Region Submitted
+    region_constituency_submit_qs = Constituency.objects.filter(region=region).filter(election_year=election.year).filter(parliamentary_submitted=False)
+    if not region_constituency_submit_qs.exists():
+        region.parliamentary_submitted = True
+        region.save()
+
+
+
+
 
 
 

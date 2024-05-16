@@ -14,7 +14,7 @@ from elections.models import Election, ElectionPresidentialCandidate, Presidenti
     PresidentialCandidateElectoralAreaVote, PresidentialCandidateConstituencyVote, PresidentialCandidateRegionalVote, \
     ElectionParliamentaryCandidate, ParliamentaryCandidatePollingStationVote
 from ghana_decides_proj.exceptions import ClientError
-from regions.models import PollingStation
+from regions.models import PollingStation, Constituency
 
 User = get_user_model()
 
@@ -108,10 +108,124 @@ class PresenterDashboardConsumers(AsyncJsonWebsocketConsumer):
 
 
 
+@database_sync_to_async
+def get_presenter_dashboard():
+    payload = {}
+    data = {}
+
+    presidential_result_chart = []
+    incoming_presidential_votes = []  # Initialize list for incoming presidential votes
+    incoming_parliamentary_votes = []  # Initialize list for incoming parliamentary votes
+
+    first_presidential_candidate = {}
+    second_presidential_candidate = {}
+
+    election_2024 = Election.objects.all().filter(year="2024").first()
+
+    all_election_2024_presidential_candidates = ElectionPresidentialCandidate.objects.all().filter(election=election_2024).order_by("-total_votes")
+
+    if all_election_2024_presidential_candidates:
+        _first_presidential_candidate = all_election_2024_presidential_candidates[0]
+        first_presidential_candidate_serializer = ElectionPresidentialCandidateSerializer(_first_presidential_candidate, many=False)
+        if first_presidential_candidate_serializer:
+            __first_presidential_candidate = first_presidential_candidate_serializer.data
+
+        first_presidential_candidate['first_presidential_candidate'] = __first_presidential_candidate
+
+        first_prez_parl_can = (ElectionParliamentaryCandidate.objects
+                               .filter(election=election_2024)
+                               .filter(won=True)
+                               .filter(candidate__party=_first_presidential_candidate.candidate.party)
+                               .order_by('-created_at')
+                               ).first()
+
+        __first_prez_parl_can_candidate = None
+        if first_prez_parl_can is not None:
+            first_prez_parl_can_serializer = ElectionParliamentaryCandidateSerializer(first_prez_parl_can, many=False)
+            __first_prez_parl_can_candidate = first_prez_parl_can_serializer.data
+
+        first_presidential_candidate['parliamentary_candidate'] = __first_prez_parl_can_candidate
+
+        if len(all_election_2024_presidential_candidates) > 1:
+            _second_presidential_candidate = all_election_2024_presidential_candidates[1]
+            second_presidential_candidate_serializer = ElectionPresidentialCandidateSerializer(_second_presidential_candidate, many=False)
+            if second_presidential_candidate_serializer:
+                __second_presidential_candidate = second_presidential_candidate_serializer.data
+
+            second_presidential_candidate['second_presidential_candidate'] = __second_presidential_candidate
+
+            second_prez_parl_can = (ElectionParliamentaryCandidate.objects
+                                    .filter(election=election_2024)
+                                    .filter(won=True)
+                                    .filter(candidate__party=_second_presidential_candidate.candidate.party)
+                                    .order_by('-created_at')
+                                    ).first()
+
+            __second_prez_parl_can_candidate = None
+            if second_prez_parl_can is not None:
+                second_prez_parl_can_serializer = ElectionParliamentaryCandidateSerializer(second_prez_parl_can, many=False)
+                if second_prez_parl_can_serializer.data:  # Check if data is not empty
+                    __second_prez_parl_can_candidate = second_prez_parl_can_serializer.data
+
+            second_presidential_candidate['parliamentary_candidate'] = __second_prez_parl_can_candidate
+
+        else:
+            second_presidential_candidate = {}
+    else:
+        first_presidential_candidate = {}
+        second_presidential_candidate = {}
+
+    for candidate in all_election_2024_presidential_candidates:
+        candidate_data = {
+            "first_name": candidate.candidate.first_name,
+            "last_name": candidate.candidate.last_name,
+            "photo": candidate.candidate.photo.url,
+            "party_full_name": candidate.candidate.party.party_full_name,
+            "party_initial": candidate.candidate.party.party_initial,
+            "party_logo": candidate.candidate.party.party_logo.url,
+            "total_votes": float(candidate.total_votes),
+            "total_votes_percent": float(candidate.total_votes_percent),
+            "parliamentary_seat": candidate.parliamentary_seat,
+        }
+
+        presidential_result_chart.append(candidate_data)
+
+    all_votes = []
+
+    all_prez_incoming_vote_candidates = PresidentialCandidatePollingStationVote.objects.all().order_by("-created_at")
+    all_prez_incoming_vote_candidates_serializer = PresidentialCandidatePollingStationVoteSerializer(all_prez_incoming_vote_candidates, many=True)
+    if all_prez_incoming_vote_candidates_serializer:
+        all_prez_incoming_vote_candidates = all_prez_incoming_vote_candidates_serializer.data
+        incoming_presidential_votes.extend(all_prez_incoming_vote_candidates)
+
+    all_parl_incoming_vote_candidates = ParliamentaryCandidatePollingStationVote.objects.all().order_by("-created_at")
+    all_parl_incoming_vote_candidates_serializer = ParliamentaryCandidatePollingStationVoteSerializer(all_parl_incoming_vote_candidates, many=True)
+    if all_parl_incoming_vote_candidates_serializer:
+        all_parl_incoming_vote_candidates = all_parl_incoming_vote_candidates_serializer.data
+        incoming_parliamentary_votes.extend(all_parl_incoming_vote_candidates)
+
+    print(len(all_votes))
+
+    incoming_presidential_votes = sorted(incoming_presidential_votes, key=lambda x: x['created_at'])[:3]  # Take only the first 3 items
+    incoming_parliamentary_votes = sorted(incoming_parliamentary_votes, key=lambda x: x['created_at'])[:3]  # Take only the first 3 items
+
+    print(len(incoming_presidential_votes))
+    print(len(incoming_parliamentary_votes))
+
+    data["first_presidential_candidate"] = first_presidential_candidate
+    data["second_presidential_candidate"] = second_presidential_candidate
+    data["presidential_result_chart"] = presidential_result_chart
+    data["incoming_presidential_votes"] = incoming_presidential_votes
+    data["incoming_parliamentary_votes"] = incoming_parliamentary_votes
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return json.dumps(payload)
+
 
 
 @database_sync_to_async
-def get_presenter_dashboard():
+def get_presenter_dashboard2222():
     payload = {}
     data = {}
 
@@ -119,21 +233,63 @@ def get_presenter_dashboard():
     presidential_result_chart = []
     incoming_votes = []
 
+    first_presidential_candidate = {}
+    second_presidential_candidate = {}
+
     election_2024 = Election.objects.all().filter(year="2024").first()
 
     all_election_2024_presidential_candidates = ElectionPresidentialCandidate.objects.all().filter(election=election_2024).order_by("-total_votes")
 
     if all_election_2024_presidential_candidates:
-        first_presidential_candidate = all_election_2024_presidential_candidates[0]
-        first_presidential_candidate_serializer = ElectionPresidentialCandidateSerializer(first_presidential_candidate, many=False)
+        _first_presidential_candidate = all_election_2024_presidential_candidates[0]
+        first_presidential_candidate_serializer = ElectionPresidentialCandidateSerializer(_first_presidential_candidate, many=False)
         if first_presidential_candidate_serializer:
-            first_presidential_candidate = first_presidential_candidate_serializer.data
+            __first_presidential_candidate = first_presidential_candidate_serializer.data
+
+        first_presidential_candidate['first_presidential_candidate'] = __first_presidential_candidate
+
+        first_prez_parl_can = (ElectionParliamentaryCandidate.objects
+                               .filter(election=election_2024)
+                               .filter(won=True)
+                               .filter(candidate__party=_first_presidential_candidate.candidate.party)
+                               .order_by('-created_at')
+                               ).first()
+
+        __first_prez_parl_can_candidate = None
+        if first_prez_parl_can is not None:
+            first_prez_parl_can_serializer = ElectionParliamentaryCandidateSerializer(first_prez_parl_can, many=False)
+            __first_prez_parl_can_candidate = first_prez_parl_can_serializer.data
+
+        first_presidential_candidate['parliamentary_candidate'] = __first_prez_parl_can_candidate
+
 
         if len(all_election_2024_presidential_candidates) > 1:
-            second_presidential_candidate = all_election_2024_presidential_candidates[1]
-            second_presidential_candidate_serializer = ElectionPresidentialCandidateSerializer(second_presidential_candidate, many=False)
+            _second_presidential_candidate = all_election_2024_presidential_candidates[1]
+            second_presidential_candidate_serializer = ElectionPresidentialCandidateSerializer(_second_presidential_candidate, many=False)
             if second_presidential_candidate_serializer:
-                second_presidential_candidate = second_presidential_candidate_serializer.data
+                __second_presidential_candidate = second_presidential_candidate_serializer.data
+
+            second_presidential_candidate['second_presidential_candidate'] = __second_presidential_candidate
+
+            second_prez_parl_can = (ElectionParliamentaryCandidate.objects
+                                    .filter(election=election_2024)
+                                    .filter(won=True)
+                                    .filter(candidate__party=_second_presidential_candidate.candidate.party)
+                                    .order_by('-created_at')
+                                    ).first()
+
+            __second_prez_parl_can_candidate = None
+            if second_prez_parl_can is not None:
+                second_prez_parl_can_serializer = ElectionParliamentaryCandidateSerializer(second_prez_parl_can,
+                                                                                           many=False)
+                if second_prez_parl_can_serializer.data:  # Check if data is not empty
+                    __second_prez_parl_can_candidate = second_prez_parl_can_serializer.data
+
+            second_presidential_candidate['parliamentary_candidate'] = __second_prez_parl_can_candidate
+
+
+
+
         else:
             second_presidential_candidate = {}
     else:
@@ -186,3 +342,4 @@ def get_presenter_dashboard():
     payload['data'] = data
 
     return json.dumps(payload)
+
