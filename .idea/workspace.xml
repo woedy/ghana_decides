@@ -4,24 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5c1ec882-703d-4d4b-9918-2c7a8a3a99a2" name="Changes" comment="Connecting Websocket v3">
-      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sels/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sels/data/readme.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sels/data/test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sels/election_prompts.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sels/prompts.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sels/sels_ai.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sels/sels_election_ai.py" afterDir="false" />
+    <list default="true" id="5c1ec882-703d-4d4b-9918-2c7a8a3a99a2" name="Changes" comment="Prototype v1">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/api/consumers/live_map_consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/consumers/live_map_consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/api/consumers/presenter_dashboard_consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/consumers/presenter_dashboard_consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/api/election_view.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/election_view.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/regions/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/regions/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/settings/api/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/settings/api/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,10 +24,13 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="building-models-1" />
+        <entry key="$PROJECT_DIR$" value="websockets-2" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
@@ -60,7 +48,7 @@
     &quot;Python.my_selenium_script.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;websockets-2&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;prototype-1&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/LENOVO/Documents/SamaPro/Backend/GhanaDecides/ghana_desides_server/ghana_desides_server/sels&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
@@ -208,7 +196,23 @@
       <option name="project" value="LOCAL" />
       <updated>1713702659665</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Connecting Websocket v3">
+      <option name="closed" value="true" />
+      <created>1715846980494</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1715846980494</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Prototype v1">
+      <option name="closed" value="true" />
+      <created>1715847072468</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1715847072468</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -230,7 +234,8 @@
     <MESSAGE value="Connecting Websocket v1" />
     <MESSAGE value="Connecting Websocket v2" />
     <MESSAGE value="Connecting Websocket v3" />
-    <option name="LAST_COMMIT_MESSAGE" value="Connecting Websocket v3" />
+    <MESSAGE value="Prototype v1" />
+    <option name="LAST_COMMIT_MESSAGE" value="Prototype v1" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
