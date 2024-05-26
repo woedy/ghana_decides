@@ -5,8 +5,42 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5c1ec882-703d-4d4b-9918-2c7a8a3a99a2" name="Changes" comment="Prototype v1">
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/1452058788/1452058788.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/1933400742/1933400742.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/1984181705/1984181705.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/2039293461/2039293461.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/2250717286/2250717286.jpeg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/2540334592/2540334592.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/3003459690/3003459690.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/303579160/303579160.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/3667931073/3667931073.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/376277723/376277723.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/532328456/532328456.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/57252594/57252594.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/parl_can/646427167/646427167.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/party_logo/1125534555/1125534555.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/party_logo/1567365709/1567365709.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/party_logo/1958604818/1958604818.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/party_logo/2887319089/2887319089.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/party_logo/2932707764/2932707764.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/party_logo/3215232680/3215232680.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/party_logo/3901697599/3901697599.jpeg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/party_logo/90710106/90710106.jpeg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/prez_can/1038417873/1038417873.jpeg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/prez_can/1914490781/1914490781.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/prez_can/2480497999/2480497999.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/prez_can/2758676056/2758676056.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/prez_can/3113358206/3113358206.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/prez_can/3198653360/3198653360.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/prez_can/3216749470/3216749470.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/prez_can/3403950873/3403950873.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/prez_can/3455559084/3455559084.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/prez_can/493364130/493364130.jpeg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/1639177515/1639177515.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/1966569068/1966569068.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/2793393649/2793393649.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static_cdn/media_root/region/822054942/822054942.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -212,7 +246,23 @@
       <option name="project" value="LOCAL" />
       <updated>1715847072468</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Prototype v1">
+      <option name="closed" value="true" />
+      <created>1716447417679</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1716447417679</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Prototype v1">
+      <option name="closed" value="true" />
+      <created>1716636621414</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1716636621415</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
