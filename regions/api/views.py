@@ -13,7 +13,8 @@ from activities.models import AllActivity
 from regions.api.serializers import AllRegionsSerializer, RegionDetailSerializer, RegionalConstituenciesSerializer, \
     AllConstituenciesSerializer, ConstituencyDetailSerializer, ConstituencyElectoralAreaSerializer, ElectoralAreaSerializer, \
     PollingStationSerializer
-from regions.models import Region, Constituency, ElectoralArea, PollingStation, PollingStationVotersParticipation
+from regions.models import Region, Constituency, ElectoralArea, PollingStation, PollingStationVotersParticipation, \
+    RegionLayerCoordinate
 
 User = get_user_model()
 
@@ -60,6 +61,134 @@ def add_region_view(request):
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def clear_all_coordinates(request):
+
+    payload = {}
+
+    data = {}
+    errors = {}
+
+    region_coords = RegionLayerCoordinate.objects.all()
+    for coord in region_coords:
+        coord.delete()
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_regions_coordinates(request):
+
+    payload = {}
+
+    data = {}
+    errors = {}
+
+    regions_geojson = request.data.get('regions_geojson', '')
+
+
+    if not regions_geojson:
+        errors['regions_geojson'] = ['Regions Geojson data is required.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+
+    features = regions_geojson['features']
+
+    for feature in features:
+        region_id = feature['properties']['region_id']
+        coords_list = feature['geometry']['coordinates']
+
+
+        for coords in coords_list:
+            for coord in coords:
+                region = Region.objects.get(region_id=region_id)
+                region_coord = RegionLayerCoordinate.objects.create(
+                   region=region,
+                    lat=coord[1],
+                    lng=coord[0]
+                )
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def list_all_region_coordinates(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    geojson_data = {
+        "type": "FeatureCollection",
+        "features": []
+    }
+
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+
+    regions = Region.objects.all()
+    response_data = []
+
+    for region in regions:
+        coordinates = RegionLayerCoordinate.objects.filter(region=region)
+
+        formatted_coordinates = [[coord.lng, coord.lat] for coord in coordinates]
+
+
+        region_data = {
+            "type": "Feature",
+            "properties": {
+                "region_id": region.region_id,
+                "region_name": region.region_name,
+                "leading_color": "#0000FF"
+            },
+            "geometry": {
+                "coordinates": [
+                    formatted_coordinates
+                ],
+                "type": "Polygon"
+            }
+        }
+
+
+
+        geojson_data["features"].append(region_data)
+
+
+
+    payload['message'] = "Successful"
+    payload['data'] = geojson_data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+
+
+
 
 
 @api_view(['POST', ])

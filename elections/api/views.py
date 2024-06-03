@@ -17,7 +17,7 @@ User = get_user_model()
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])
-def add_election_view(request):
+def  add_election_view(request):
     payload = {}
     data = {}
     errors = {}

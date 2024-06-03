@@ -1,10 +1,12 @@
 import json
+from decimal import Decimal
 
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 
 from elections.api.serializers import AllElectionSerializer, ElectionPresidentialCandidateSerializer, \
@@ -14,7 +16,7 @@ from elections.models import Election, ElectionPresidentialCandidate, Presidenti
     PresidentialCandidateElectoralAreaVote, PresidentialCandidateConstituencyVote, PresidentialCandidateRegionalVote, \
     ElectionParliamentaryCandidate, ParliamentaryCandidatePollingStationVote
 from ghana_decides_proj.exceptions import ClientError
-from regions.models import PollingStation, Region
+from regions.models import PollingStation, Region, RegionLayerCoordinate
 
 User = get_user_model()
 
@@ -133,6 +135,11 @@ class LiveMapConsumers(AsyncJsonWebsocketConsumer):
         return
 
 
+class CustomJSONEncoder(DjangoJSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super().default(obj)
 
 
 
@@ -155,6 +162,14 @@ def get_live_map_data():
     electoral_area_name = None
     polling_station_name = None
 
+
+    region_geojson_data = {
+        "type": "FeatureCollection",
+        "features": []
+    }
+
+
+
     if result_state == "General":
         election_2024 = Election.objects.all().filter(year=election_year).first()
 
@@ -166,6 +181,24 @@ def get_live_map_data():
         for region in regions:
             print(region.region_name)
             display_names_list.append(region.region_name)
+
+            coordinates = RegionLayerCoordinate.objects.filter(region=region)
+            formatted_coordinates = [[coord.lng, coord.lat] for coord in coordinates]
+            region_data = {
+                "type": "Feature",
+                "properties": {
+                    "region_id": region.region_id,
+                    "region_name": region.region_name,
+                    "leading_color": "#0000FF"
+                },
+                "geometry": {
+                    "coordinates": [
+                        formatted_coordinates
+                    ],
+                    "type": "Polygon"
+                }
+            }
+            region_geojson_data["features"].append(region_data)
 
     if result_state == "General":
         data['region_name'] = "All Regions"
@@ -184,12 +217,13 @@ def get_live_map_data():
     data['result_state'] = result_state
     data['candidates'] = candidates
     data['display_names_list'] = display_names_list
+    data['region_geojson_data'] = region_geojson_data
 
 
     payload['message'] = "Successful"
     payload['data'] = data
 
-    return json.dumps(payload)
+    return json.dumps(payload, cls=CustomJSONEncoder)
 
 
 
@@ -212,11 +246,16 @@ def get_map_filter_data(dataa):
 
     display_names_list = []
 
+    region_geojson_data = {
+        "type": "FeatureCollection",
+        "features": []
+    }
 
-    region_name = None
-    constituency_name = None
-    electoral_area_name = None
-    polling_station_name = None
+
+    #region_name = None
+    #constituency_name = None
+    #electoral_area_name = None
+    #polling_station_name = None
 
     if result_state == "General":
         election_2024 = Election.objects.all().filter(year=election_year).first()
@@ -227,9 +266,7 @@ def get_map_filter_data(dataa):
                                                                                          many=True)
             candidates = general_prez_can_votes_serializer.data
 
-            regions = Region.objects.all()
-            for region in regions:
-                display_names_list.append(region.region_name)
+
 
 
         if election_level == "Parliamentary":
@@ -280,30 +317,61 @@ def get_map_filter_data(dataa):
 
             parl_parties["second_parl_party"] = parl_party_2
 
-
-
-
-    elif result_state == "Region":
-
-        election_2024 = Election.objects.all().filter(year=election_year).first()
-        #region = Region.objects.all().get(region_name=region_name)
-
-
-        regional_prez_can_votes = PresidentialCandidateRegionalVote.objects.filter(election=election_year).order_by("-total_votes")
-        region_name = regional_prez_can_votes.first().region.region_name
-        regional_prez_can_votes_serializer = PresidentialCandidateRegionalVoteSerializer(regional_prez_can_votes, many=True)
-        candidates = regional_prez_can_votes_serializer.data
-
-    if result_state == "General":
         data['region_name'] = "All Regions"
-    if result_state == "Region":
+
+
+        regions = Region.objects.all()
+        for region in regions:
+            print(region.region_name)
+            display_names_list.append(region.region_name)
+
+            coordinates = RegionLayerCoordinate.objects.filter(region=region)
+            formatted_coordinates = [[coord.lng, coord.lat] for coord in coordinates]
+            region_data = {
+                "type": "Feature",
+                "properties": {
+                    "region_id": region.region_id,
+                    "region_name": region.region_name,
+                    "leading_color": "#0000FF"
+                },
+                "geometry": {
+                    "coordinates": [
+                        formatted_coordinates
+                    ],
+                    "type": "Polygon"
+                }
+            }
+            region_geojson_data["features"].append(region_data)
+
+
+
+    elif  result_state == "Region":
+        election_2024 = Election.objects.all().filter(year=election_year).first()
+        # region = Region.objects.all().get(region_name=region_name)
+
+        if election_level == "Presidential":
+            regional_prez_can_votes = PresidentialCandidateRegionalVote.objects.filter(election=election_2024).filter(region__region_name=region_name).order_by('-total_votes')
+            print("############33 REGG")
+            print(regional_prez_can_votes)
+            # region_name = regional_prez_can_votes.first().region.region_name
+            regional_prez_can_votes_serializer = PresidentialCandidateRegionalVoteSerializer(regional_prez_can_votes,
+                                                                                             many=True)
+            candidates = regional_prez_can_votes_serializer.data
+
+
         data['region_name'] = region_name
-    elif result_state == "Constituency":
-        data['region_name'] = constituency_name
-    elif result_state == "Electoral Area":
-        data['region_name'] = electoral_area_name
-    elif result_state == "Polling Station":
-        data['region_name'] = polling_station_name
+        regions = Region.objects.all()
+        for region in regions:
+            display_names_list.append(region.region_name)
+
+
+
+    #elif result_state == "Constituency":
+    #    data['region_name'] = constituency_name
+    #elif result_state == "Electoral Area":
+    #    data['region_name'] = electoral_area_name
+    #elif result_state == "Polling Station":
+    #    data['region_name'] = polling_station_name
 
 
     data['election_year'] = election_year
@@ -319,7 +387,7 @@ def get_map_filter_data(dataa):
     payload['message'] = "Successful"
     payload['data'] = data
 
-    return json.dumps(payload)
+    return json.dumps(payload, cls=CustomJSONEncoder)
 
 
 

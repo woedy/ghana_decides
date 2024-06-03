@@ -8,7 +8,7 @@ from regions.api.views import get_all_regions, get_region_detail, get_region_con
     get_electoral_area_polling_stations, add_polling_station_view, \
     get_all_polling_stations, get_polling_station_detail, edit_polling_station_view, delete_polling_station_view, \
     add_polling_station_participation, add_all_region_constituencies, add_electoral_areas_list_view, \
-    add_polling_stations_list_view
+    add_polling_stations_list_view, add_regions_coordinates, list_all_region_coordinates, clear_all_coordinates
 
 app_name = 'region'
 
@@ -17,6 +17,9 @@ urlpatterns = [
     path('region-details/', get_region_detail , name="get_region_detail"),
     path('get-regional-constituencies/', get_region_constituencies , name="get_region_constituencies"),
     path('add-region/', add_region_view , name="add_region_view"),
+    path('add-regions-coordinates/', add_regions_coordinates , name="add_regions_coordinates"),
+    path('clear-regions-coordinates/', clear_all_coordinates , name="clear_all_coordinates"),
+    path('list-regions-coordinates/', list_all_region_coordinates , name="list_all_region_coordinates"),
     path('add-regions-constituencies/', add_all_region_constituencies , name="add_all_region_constituencies"),
     path('edit-region/', edit_region_view, name="edit_region_view"),
     path('delete-region/', delete_region_view , name="delete_region_view"),

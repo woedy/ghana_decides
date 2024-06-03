@@ -1,52 +1,93 @@
-from llama_index.llms.ollama import Ollama
-from llama_parse import LlamaParse
-from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, PromptTemplate
-from llama_index.core.embeddings import resolve_embed_model
-from llama_index.core.tools import QueryEngineTool, ToolMetadata
-from llama_index.core.agent import ReActAgent
-from prompts import context, code_parser_template
-
-
+import streamlit as st
+from PyPDF2 import PdfReader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+import os
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+import google.generativeai as genai
+from langchain_community.vectorstores import FAISS
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.chains.question_answering import load_qa_chain
+from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
+import asyncio
 
+# Load environment variables
 load_dotenv()
+api_key = os.getenv("GOOGLE_API_KEY")
+if not api_key:
+    raise ValueError("GOOGLE_API_KEY not found in environment variables.")
+genai.configure(api_key=api_key)
 
 
-llm = Ollama(
-    model="phi3",
-    request_timeout=2000.0
-)
+def get_pdf_text(pdf_docs):
+    text = ""
+    for pdf in pdf_docs:
+        pdf_reader = PdfReader(pdf)
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+    return text
 
 
-parser = LlamaParse(result_type="markdown")
-
-file_extractor = {".pdf": parser}
-
-documents = SimpleDirectoryReader("./data", file_extractor=file_extractor).load_data()
-
-embed_model = resolve_embed_model("local:BAAI/bge-m3")
-
-vector_index = VectorStoreIndex.from_documents(documents, embed_model=embed_model)
+def get_text_chunks(text):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
+    chunks = text_splitter.split_text(text)
+    return chunks
 
 
-query_engine = vector_index.as_query_engine(llm=llm)
-#result = query_engine.query("what are some of the routes in the api?")
-#print(result)
+def get_vector_store(text_chunks):
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
+    vector_store.save_local("faiss_index")
 
-tools = [
-    QueryEngineTool(
-        query_engine=query_engine,
-        metadata=ToolMetadata(
-            name="api_documentation",
-            description="this gives documentation about code for an API. Use this for reading docs for the API."
-        )
-    )
-]
 
-code_llm = Ollama(model="codellama")
+def get_conversational_chain():
+    prompt_template = """
+    Answer the question as detailed as possible from the provided context, make sure to provide all the details. If the answer is not in
+    provided context, just say, "answer is not available in the context", don't provide the wrong answer. Answer like you are a tv presenter presenting on an election day.\n\n
+    Context:\n {context}\n
+    Question: \n{question}\n
+    Answer:
+    """
+    model = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.9)
+    prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
+    chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
+    return chain
 
-agent = ReActAgent.from_tools(tools, llm=code_llm, verbose=True, context=context)
 
-while (prompt := input("Enter a prompt (q to quit): ")) != "q":
-    result = agent.query(prompt)
-    print(result)
+def user_input(user_question):
+    # Ensure that an event loop is available
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+    docs = new_db.similarity_search(user_question)
+    chain = get_conversational_chain()
+    #response = chain.invoke({"input_documents": docs, "question": user_question}, return_only_outputs=True)
+    response = chain.invoke({"input_documents": docs, "question": user_question})
+    st.write("Reply: ", response["output_text"])
+
+
+def main():
+    st.set_page_config("Chat PDF")
+    st.header("Chat with PDF using SELS AI💁")
+    user_question = st.text_input("Ask a Question from the PDF Files")
+    if user_question:
+        user_input(user_question)
+    with st.sidebar:
+        st.title("Menu:")
+        pdf_docs = st.file_uploader("Upload your PDF Files and Click on the Submit & Process Button",
+                                    accept_multiple_files=True)
+        if st.button("Submit & Process"):
+            with st.spinner("Processing..."):
+                raw_text = get_pdf_text(pdf_docs)
+                text_chunks = get_text_chunks(raw_text)
+                get_vector_store(text_chunks)
+                st.success("Done")
+
+
+if __name__ == "__main__":
+    main()

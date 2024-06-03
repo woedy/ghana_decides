@@ -1071,6 +1071,28 @@ def add_election_parliamentary_vote_view(request):
                 candidate.parliamentary_seat = int(candidate.parliamentary_seat) + 1
                 candidate.save()
 
+                #Add Regional Seat ################
+                #Add Regional Seat ################
+                #Add Regional Seat ################
+                region_vote = PresidentialCandidateRegionalVote.objects.filter(
+                    election=election,
+                    prez_candidate=candidate,
+                    region=region
+                ).first()
+
+                region_vote.parliamentary_seat = region_vote.parliamentary_seat + 1
+                region_vote.save()
+
+                #### Set Presidential Candidate to win in Constituency
+                constituency_vote = PresidentialCandidateConstituencyVote.objects.filter(
+                    election=election,
+                    prez_candidate=candidate,
+                    constituency=constituency
+                ).first()
+
+                constituency_vote.won = True
+                constituency_vote.save()
+
         leading_candidate.parl_candidate.won = True
         leading_candidate.parl_candidate.save()
         leading_candidate.save()
