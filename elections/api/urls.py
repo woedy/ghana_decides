@@ -6,7 +6,7 @@ from elections.api.election_view import add_election_presidential_candidate_view
     get_election_2024_dashboard_view, add_election_parliamentary_vote_view, \
     add_election_presidential_candidate_list_view, add_election_parliamentary_candidate_list_view
 from elections.api.views import add_election_view, get_all_election_history_view, get_election_details, \
-    add_election_2024_view
+    add_election_2024_view, get_regional_presidential_votes
 
 app_name = 'elections'
 
@@ -38,5 +38,8 @@ urlpatterns = [
 
     path('add-parliamentary-vote/', add_election_parliamentary_vote_view,
          name="add_election_parliamentary_vote_view"),
+
+    path('get-regional-presidential-votes/', get_regional_presidential_votes,
+         name="get_regional_presidential_votes"),
 
 ]

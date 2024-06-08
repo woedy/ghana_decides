@@ -7,8 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from activities.models import AllActivity
-from elections.api.serializers import AllElectionSerializer, ElectionDetailSerializer
-from elections.models import Election
+from elections.api.serializers import AllElectionSerializer, ElectionDetailSerializer, \
+    PresidentialCandidateRegionalVoteSerializer
+from elections.models import Election, PresidentialCandidateRegionalVote
 from candidates.models import Party
 
 User = get_user_model()
@@ -166,3 +167,40 @@ def add_election_2024_view(request):
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
+
+
+#########################################################
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_regional_presidential_votes(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    region_name = 'Volta Region'
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    election_2024 = Election.objects.all().filter(year='2024').first()
+
+    regional_prez_can_votes = PresidentialCandidateRegionalVote.objects.filter(election=election_2024).filter(
+        region__region_name=region_name).order_by('-total_votes')
+    print("############33 REGG")
+    print(regional_prez_can_votes)
+    # region_name = regional_prez_can_votes.first().region.region_name
+    regional_prez_can_votes_serializer = PresidentialCandidateRegionalVoteSerializer(regional_prez_can_votes,
+                                                                                     many=True)
+    candidates = regional_prez_can_votes_serializer.data
+
+    payload['message'] = "Successful"
+    payload['data'] = candidates
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+

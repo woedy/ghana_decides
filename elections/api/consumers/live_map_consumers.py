@@ -14,7 +14,7 @@ from elections.api.serializers import AllElectionSerializer, ElectionPresidentia
     ParliamentaryCandidatePollingStationVoteSerializer, PresidentialCandidateRegionalVoteSerializer
 from elections.models import Election, ElectionPresidentialCandidate, PresidentialCandidatePollingStationVote, \
     PresidentialCandidateElectoralAreaVote, PresidentialCandidateConstituencyVote, PresidentialCandidateRegionalVote, \
-    ElectionParliamentaryCandidate, ParliamentaryCandidatePollingStationVote
+    ElectionParliamentaryCandidate, ParliamentaryCandidatePollingStationVote, ParliamentaryCandidateRegionalVote
 from ghana_decides_proj.exceptions import ClientError
 from regions.models import PollingStation, Region, RegionLayerCoordinate
 
@@ -364,8 +364,7 @@ def get_map_filter_data(dataa):
         for region in regions:
             display_names_list.append(region.region_name)
 
-
-
+       
     #elif result_state == "Constituency":
     #    data['region_name'] = constituency_name
     #elif result_state == "Electoral Area":

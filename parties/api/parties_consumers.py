@@ -1,14 +1,9 @@
-import base64
 import json
-from io import BytesIO
 
-from PIL import Image
 from channels.db import database_sync_to_async
-from channels.layers import get_channel_layer
 from django.contrib.auth import get_user_model
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from django.core.files.base import ContentFile
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from rest_framework import status
@@ -18,8 +13,7 @@ from activities.models import AllActivity
 from candidates.api.serializers import AllPartiesSerializer
 from candidates.models import Party
 from ghana_decides_proj.exceptions import ClientError
-from regions.api.serializers import AllRegionsSerializer, AllConstituenciesSerializer
-from regions.models import Region, Constituency
+
 
 User = get_user_model()
 
