@@ -466,6 +466,7 @@ def get_map_filter_data(dataa):
     data['candidates'] = candidates
     data['parl_parties'] = parl_parties
     data['display_names_list'] = display_names_list
+    #data['region_geojson_data'] = region_geojson_data
 
 
 
