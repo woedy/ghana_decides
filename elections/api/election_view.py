@@ -540,6 +540,13 @@ def add_election_presidential_vote_view(request):
         }
     )
 
+    async_to_sync(channel_layer.group_send)(
+        'live-map-room',
+        {
+            "type": "update_map_dashboard",
+        }
+    )
+
     payload['message'] = "Successful"
     payload['data'] = data
 

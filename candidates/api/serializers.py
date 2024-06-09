@@ -14,6 +14,7 @@ class CandidatePartySerializer(serializers.ModelSerializer):
             'party_full_name',
             'party_initial',
             'party_logo',
+            'party_color',
         ]
 
 
@@ -99,6 +100,8 @@ class PartyDetailSerializer(serializers.ModelSerializer):
             'party_initial',
             'year_formed',
             'party_logo',
+            'party_color',
+
         ]
 
 class AllPartiesSerializer(serializers.ModelSerializer):
@@ -110,4 +113,6 @@ class AllPartiesSerializer(serializers.ModelSerializer):
             'party_full_name',
             'party_initial',
             'party_logo',
+            'party_color',
+
         ]

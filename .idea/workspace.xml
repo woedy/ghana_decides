@@ -4,26 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5c1ec882-703d-4d4b-9918-2c7a8a3a99a2" name="Changes" comment="Prototype v2">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="5c1ec882-703d-4d4b-9918-2c7a8a3a99a2" name="Changes" comment="Working Prototype">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/activities/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/candidates/migrations/0001_initial.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/candidates/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/candidates/api/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/candidates/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/candidates/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/elections/api/consumers/live_map_consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/consumers/live_map_consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/elections/api/election_view.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/election_view.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/elections/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parties/api/parties_consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/parties/api/parties_consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/regions/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/regions/migrations/0002_pollingstationvotersparticipation_turn_out_percent_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/regions/migrations/0003_rename_turn_out_pollingstationvotersparticipation_non_voters.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/search/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/user_profile/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/user_profile/migrations/0002_userprofile_id_card.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/video_call/migrations/0001_initial.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,6 +34,18 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;woedy&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/woedy/ghana_decides.git&quot;,
+    &quot;accountId&quot;: &quot;0632b613-e72e-47e5-82f4-31d2d642d358&quot;
+  }
+}</component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -279,7 +279,15 @@
       <option name="project" value="LOCAL" />
       <updated>1716688849951</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Working Prototype">
+      <option name="closed" value="true" />
+      <created>1717819023223</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1717819023223</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -303,7 +311,8 @@
     <MESSAGE value="Connecting Websocket v3" />
     <MESSAGE value="Prototype v1" />
     <MESSAGE value="Prototype v2" />
-    <option name="LAST_COMMIT_MESSAGE" value="Prototype v2" />
+    <MESSAGE value="Working Prototype" />
+    <option name="LAST_COMMIT_MESSAGE" value="Working Prototype" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

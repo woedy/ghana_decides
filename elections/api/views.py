@@ -8,9 +8,10 @@ from rest_framework.response import Response
 
 from activities.models import AllActivity
 from elections.api.serializers import AllElectionSerializer, ElectionDetailSerializer, \
-    PresidentialCandidateRegionalVoteSerializer
+    PresidentialCandidateRegionalVoteSerializer, ElectionPresidentialCandidateSerializer
 from elections.models import Election, PresidentialCandidateRegionalVote
 from candidates.models import Party
+from regions.models import RegionLayerCoordinate
 
 User = get_user_model()
 
@@ -171,6 +172,54 @@ def add_election_2024_view(request):
 
 #########################################################
 
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_regional_presidential_votes(request):
+    payload = {}
+    errors = {}
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    election_2024 = Election.objects.filter(year='2024').first()
+
+    if not election_2024:
+        payload['message'] = "Election not found"
+        return Response(payload, status=status.HTTP_404_NOT_FOUND)
+
+    regional_prez_can_votes = PresidentialCandidateRegionalVote.objects.filter(election=election_2024)
+
+    regionsss = {}
+
+    for entry in regional_prez_can_votes:
+        region_name = entry.region.region_name
+        prez_candidate = entry.prez_candidate
+
+        # Serialize the prez_candidate object
+        prez_candidate_serialized = ElectionPresidentialCandidateSerializer(prez_candidate).data
+
+        candidate_info = {
+            "election_prez_id": prez_candidate_serialized['election_prez_id'],
+            "candidate": prez_candidate_serialized['candidate'],
+            "total_votes": prez_candidate_serialized['total_votes'],
+            "total_votes_percent": prez_candidate_serialized['total_votes_percent'],
+            "region_total_votes": entry.total_votes,
+            "region_total_votes_percent": entry.total_votes_percent,
+            "region_parliamentary_seat": entry.parliamentary_seat
+        }
+
+        if region_name not in regionsss:
+            regionsss[region_name] = []
+
+        regionsss[region_name].append(candidate_info)
+
+    payload['message'] = "Successful"
+    payload['data'] = regionsss
+
+    return Response(payload, status=status.HTTP_200_OK)
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
@@ -180,8 +229,6 @@ def get_regional_presidential_votes(request):
     data = {}
     errors = {}
 
-    region_name = 'Volta Region'
-
     if errors:
         payload['message'] = "Errors"
         payload['errors'] = errors
@@ -189,18 +236,59 @@ def get_regional_presidential_votes(request):
 
     election_2024 = Election.objects.all().filter(year='2024').first()
 
-    regional_prez_can_votes = PresidentialCandidateRegionalVote.objects.filter(election=election_2024).filter(
-        region__region_name=region_name).order_by('-total_votes')
-    print("############33 REGG")
-    print(regional_prez_can_votes)
-    # region_name = regional_prez_can_votes.first().region.region_name
-    regional_prez_can_votes_serializer = PresidentialCandidateRegionalVoteSerializer(regional_prez_can_votes,
-                                                                                     many=True)
-    candidates = regional_prez_can_votes_serializer.data
+    regional_prez_can_votes = PresidentialCandidateRegionalVote.objects.filter(election=election_2024)
+
+    regions_map_data = {}
+
+    for entry in regional_prez_can_votes:
+        region_name = entry.region.region_name
+        region_id = entry.region.region_id
+        prez_candidate = entry.prez_candidate
+        prez_candidate_serialized = ElectionPresidentialCandidateSerializer(prez_candidate, many=False).data
+
+        # Retrieve region coordinates
+        region_coordinates = RegionLayerCoordinate.objects.filter(region=entry.region)
+        coordinates = [{"lng": coord.lng, "lat": coord.lat} for coord in region_coordinates]
+
+        candidate_info = {
+            "region_id": region_id,
+            "election_prez_id": prez_candidate_serialized['election_prez_id'],
+            "party_id": prez_candidate_serialized['candidate']['party']['party_id'],
+            "party_name": prez_candidate_serialized['candidate']['party']['party_full_name'],
+            "party_color": prez_candidate_serialized['candidate']['party']['party_color'],
+            "total_votes": entry.total_votes,
+            "coordinates": coordinates
+        }
+
+        if region_name not in regions_map_data:
+            regions_map_data[region_name] = candidate_info
+        else:
+            if candidate_info["total_votes"] > regions_map_data[region_name]["total_votes"]:
+                regions_map_data[region_name] = candidate_info
+
+    # Map to the desired structure
+    region_data_list = []
+
+    for region_name, info in regions_map_data.items():
+        coordinates = info["coordinates"]
+        formatted_coordinates = [[coord["lng"], coord["lat"]] for coord in coordinates]
+
+        region_data = {
+            "type": "Feature",
+            "properties": {
+                "region_id": info.get("region_id", ""),  # Assuming region_id can be added in the original data structure
+                "region_name": region_name,
+                "leading_color": info["party_color"]
+            },
+            "geometry": {
+                "coordinates": [formatted_coordinates],
+                "type": "Polygon"
+            }
+        }
+
+        region_data_list.append(region_data)
 
     payload['message'] = "Successful"
-    payload['data'] = candidates
+    payload['data'] = region_data_list
 
     return Response(payload, status=status.HTTP_200_OK)
-
-
