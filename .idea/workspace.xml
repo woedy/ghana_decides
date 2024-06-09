@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5c1ec882-703d-4d4b-9918-2c7a8a3a99a2" name="Changes" comment="Working Prototype">
+    <list default="true" id="5c1ec882-703d-4d4b-9918-2c7a8a3a99a2" name="Changes" comment="Working Prototype - Done">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/candidates/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/candidates/api/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/candidates/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/candidates/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/elections/api/consumers/live_map_consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/consumers/live_map_consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/api/election_view.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/election_view.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elections/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/elections/api/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -287,7 +282,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717819023223</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Working Prototype - Done">
+      <option name="closed" value="true" />
+      <created>1717906095118</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1717906095118</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -312,7 +315,8 @@
     <MESSAGE value="Prototype v1" />
     <MESSAGE value="Prototype v2" />
     <MESSAGE value="Working Prototype" />
-    <option name="LAST_COMMIT_MESSAGE" value="Working Prototype" />
+    <MESSAGE value="Working Prototype - Done" />
+    <option name="LAST_COMMIT_MESSAGE" value="Working Prototype - Done" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

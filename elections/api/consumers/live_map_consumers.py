@@ -298,8 +298,58 @@ def get_map_filter_data(dataa):
                                                                                          many=True)
             candidates = general_prez_can_votes_serializer.data
 
+            regional_prez_can_votes = PresidentialCandidateRegionalVote.objects.filter(election=election_2024)
 
+            regions_map_data = {}
 
+            for entry in regional_prez_can_votes:
+                region_name = entry.region.region_name
+                region_id = entry.region.region_id
+                prez_candidate = entry.prez_candidate
+                prez_candidate_serialized = ElectionPresidentialCandidateSerializer(prez_candidate, many=False).data
+
+                # Retrieve region coordinates
+                region_coordinates = RegionLayerCoordinate.objects.filter(region=entry.region)
+                coordinates = [{"lng": coord.lng, "lat": coord.lat} for coord in region_coordinates]
+
+                candidate_info = {
+                    "region_id": region_id,
+                    "election_prez_id": prez_candidate_serialized['election_prez_id'],
+                    "party_id": prez_candidate_serialized['candidate']['party']['party_id'],
+                    "party_name": prez_candidate_serialized['candidate']['party']['party_full_name'],
+                    "party_color": prez_candidate_serialized['candidate']['party']['party_color'],
+                    "total_votes": entry.total_votes,
+                    "coordinates": coordinates
+                }
+
+                if region_name not in regions_map_data:
+                    regions_map_data[region_name] = candidate_info
+                else:
+                    if candidate_info["total_votes"] > regions_map_data[region_name]["total_votes"]:
+                        regions_map_data[region_name] = candidate_info
+
+            # Map to the desired structure
+            region_data_list = []
+
+            for region_name, info in regions_map_data.items():
+                coordinates = info["coordinates"]
+                formatted_coordinates = [[coord["lng"], coord["lat"]] for coord in coordinates]
+
+                region_data = {
+                    "type": "Feature",
+                    "properties": {
+                        "region_id": info.get("region_id", ""),
+                        # Assuming region_id can be added in the original data structure
+                        "region_name": region_name,
+                        "leading_color": info["party_color"]
+                    },
+                    "geometry": {
+                        "coordinates": [formatted_coordinates],
+                        "type": "Polygon"
+                    }
+                }
+
+                region_geojson_data['features'].append(region_data)
 
         if election_level == "Parliamentary":
             all_election_2024_presidential_candidates = ElectionPresidentialCandidate.objects.all().filter(
