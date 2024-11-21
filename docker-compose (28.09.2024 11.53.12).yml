@@ -1,0 +1,79 @@
+version: "3.8"
+services:
+
+  # Redis
+  redis:
+    image: redis:alpine
+    container_name: ghana_decides_redis
+
+  # Database Postgres
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ghana_decides_postgres
+      - POSTGRES_USER=ghana_decides_postgres
+      - POSTGRES_PASSWORD=ghana_decides_postgres
+    container_name: ghana_decides_postgres_db
+
+  # Django Application
+  ghana_decides_app:
+    build:
+      context: .
+    volumes:
+      - .:/ghana_decides_django
+      - ./static_cdn:/var/lib/static_cdn
+      - ~/certs:/certs  # Ensure this path has your SSL certs
+    ports:
+      - 5050:5050  # Map port 5050 for HTTPS
+    container_name: ghana_decides_app
+    command: python manage.py runserver_plus 0.0.0.0:5050 --cert /certs/cert.crt --key /certs/cert.key
+    depends_on:
+      - db
+
+  # Daphne for handling HTTPS and WebSocket connections
+  daphne:
+    build:
+      context: .
+    container_name: ghana_decides_daphne
+    command: daphne -u /tmp/daphne.sock -e ssl:5050:privateKey=/certs/cert.key:certificate=/certs/cert.crt ghana_decides_proj.asgi:application
+    volumes:
+      - .:/ghana_decides_django
+      - ~/certs:/certs  # Ensure this path has your SSL certs
+    ports:
+      - "5051:5050"  # Map port for WSS
+    depends_on:
+      - redis
+      - db
+
+  # Celery Worker
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A ghana_decides_proj worker -l DEBUG
+    volumes:
+      - .:/ghana_decides_django
+    container_name: ghana_decides_celery
+    depends_on:
+      - db
+      - redis
+      - ghana_decides_app
+
+  # Celery Beat
+  celery-beat:
+    restart: always
+    build:
+      context: .
+    command: celery -A ghana_decides_proj beat -l DEBUG
+    volumes:
+      - .:/ghana_decides_django
+    container_name: ghana_decides_celery_beat
+    depends_on:
+      - db
+      - redis
+      - ghana_decides_app
+
+volumes:
+  static_cdn:

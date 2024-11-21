@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  # Redis
+  redis:
+    image: redis:alpine
+    container_name: ghana_decides_redis
+
+  # Database Postgres
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ghana_decides_postgres
+      - POSTGRES_USER=ghana_decides_postgres
+      - POSTGRES_PASSWORD=ghana_decides_postgres
+    container_name: ghana_decides_postgres_db
+
+  # Django Application
+  ghana_decides_app:
+    build:
+      context: .
+    volumes:
+      - .:/ghana_decides_django
+      - ./static_cdn:/var/lib/static_cdn
+    ports:
+      - 5050:5050
+    container_name: ghana_decides_app
+    command: python manage.py runserver 0.0.0.0:5050
+    depends_on:
+      - db
+
+  # React Application
+  ghana_decides_frontend:
+    build:
+      context: ../ghana_decides_frontend  # Adjust the path to your React app
+    ports:
+      - "3000:5000"  # Map to the host's port
+    environment:
+      - REACT_APP_API_URL=http://ghana_decides_app:5050  # API URL for Django service
+
+  # Celery Worker
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A ghana_decides_proj worker -l DEBUG
+    volumes:
+      - .:/ghana_decides_django
+    container_name: ghana_decides_celery
+    depends_on:
+      - db
+      - redis
+      - ghana_decides_app
+
+  # Celery Beat
+  celery-beat:
+    restart: always
+    build:
+      context: .
+    command: celery -A ghana_decides_proj beat -l DEBUG
+    volumes:
+      - .:/ghana_decides_django
+    container_name: ghana_decides_celery_beat
+    depends_on:
+      - db
+      - redis
+      - ghana_decides_app
+
+volumes:
+  static_cdn:
